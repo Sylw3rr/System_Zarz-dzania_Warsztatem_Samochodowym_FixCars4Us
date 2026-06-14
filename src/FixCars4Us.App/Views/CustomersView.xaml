@@ -1,6 +1,7 @@
 <UserControl x:Class="FixCars4Us.App.Views.CustomersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FixCars4Us.App">
     <Grid Margin="6">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -13,11 +14,11 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy klient" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewCustomerName}" ToolTip="Nazwa / imię i nazwisko"/>
-                    <TextBox Text="{Binding NewCustomerPhone}" ToolTip="Telefon"/>
-                    <TextBox Text="{Binding NewCustomerEmail}" ToolTip="E-mail"/>
+                    <TextBox Text="{Binding NewCustomerName}" ToolTip="Nazwa / imię i nazwisko" local:Placeholder.Text="np. Jan Kowalski"/>
+                    <TextBox Text="{Binding NewCustomerPhone}" ToolTip="Telefon" local:Placeholder.Text="np. 600 123 456"/>
+                    <TextBox Text="{Binding NewCustomerEmail}" ToolTip="E-mail" local:Placeholder.Text="np. jan.kowalski@email.pl"/>
                     <ComboBox ItemsSource="{Binding CustomerTypes}" SelectedItem="{Binding NewCustomerType}"/>
-                    <TextBox Text="{Binding NewCustomerDiscount}" ToolTip="Rabat stały %"/>
+                    <TextBox Text="{Binding NewCustomerDiscount}" ToolTip="Rabat stały %" local:Placeholder.Text="np. 5"/>
                     <Button Content="Dodaj klienta" Command="{Binding AddCustomerCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
@@ -35,11 +36,11 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy pojazd" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewVehicleReg}" ToolTip="Nr rejestracyjny"/>
-                    <TextBox Text="{Binding NewVehicleVin}" ToolTip="VIN"/>
-                    <TextBox Text="{Binding NewVehicleBrand}" ToolTip="Marka"/>
-                    <TextBox Text="{Binding NewVehicleModel}" ToolTip="Model"/>
-                    <TextBox Text="{Binding NewVehicleMileage}" ToolTip="Przebieg"/>
+                    <TextBox Text="{Binding NewVehicleReg}" ToolTip="Nr rejestracyjny" local:Placeholder.Text="np. WA12345"/>
+                    <TextBox Text="{Binding NewVehicleVin}" ToolTip="VIN" local:Placeholder.Text="np. WVWZZZ1JZXW000001"/>
+                    <TextBox Text="{Binding NewVehicleBrand}" ToolTip="Marka" local:Placeholder.Text="np. Volkswagen"/>
+                    <TextBox Text="{Binding NewVehicleModel}" ToolTip="Model" local:Placeholder.Text="np. Golf"/>
+                    <TextBox Text="{Binding NewVehicleMileage}" ToolTip="Przebieg" local:Placeholder.Text="np. 120000"/>
                     <Button Content="Dodaj pojazd" Command="{Binding AddVehicleCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Vehicles}" SelectedItem="{Binding SelectedVehicle}">
@@ -58,9 +59,9 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy wpis historii" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewHistoryDescription}" ToolTip="Opis"/>
-                    <TextBox Text="{Binding NewHistoryMileage}" ToolTip="Przebieg"/>
-                    <TextBox Text="{Binding NewHistoryCost}" ToolTip="Koszt"/>
+                    <TextBox Text="{Binding NewHistoryDescription}" ToolTip="Opis" local:Placeholder.Text="np. Wymiana oleju"/>
+                    <TextBox Text="{Binding NewHistoryMileage}" ToolTip="Przebieg" local:Placeholder.Text="np. 125000"/>
+                    <TextBox Text="{Binding NewHistoryCost}" ToolTip="Koszt" local:Placeholder.Text="np. 250"/>
                     <Button Content="Dodaj wpis" Command="{Binding AddHistoryCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding History}">

@@ -1,6 +1,7 @@
 <UserControl x:Class="FixCars4Us.App.Views.RepairsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FixCars4Us.App">
     <Grid Margin="4">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.3*"/>
@@ -54,7 +55,7 @@
                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Vehicles}" SelectedItem="{Binding NewVehicle}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Usterka:"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewFault}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewFault}" local:Placeholder.Text="np. Stuk w przedniej zawieszeniu"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Specjalizacja:"/>
                         <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Specializations}" SelectedItem="{Binding NewSpecialization}"/>
@@ -63,10 +64,10 @@
                         <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding LiftTypes}" SelectedItem="{Binding NewLiftType}"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Text="Wymagany udźwig (kg):"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding NewCapacityKg}"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding NewCapacityKg}" local:Placeholder.Text="np. 2000"/>
 
                         <TextBlock Grid.Row="5" Grid.Column="0" Text="Szac. czas (h):"/>
-                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding NewEstimatedHours}"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding NewEstimatedHours}" local:Placeholder.Text="np. 3"/>
 
                         <CheckBox Grid.Row="6" Grid.Column="1" Content="Wymaga narzędzia diagnostycznego" IsChecked="{Binding NewRequiresTool}" Margin="4"/>
 
@@ -74,7 +75,7 @@
                             <TextBlock Text="Data:"/>
                             <DatePicker SelectedDate="{Binding NewDate}"/>
                             <TextBlock Text="Godz:"/>
-                            <TextBox Text="{Binding NewStartHour}" Width="45"/>
+                            <TextBox Text="{Binding NewStartHour}" Width="45" local:Placeholder.Text="np. 9"/>
                             <Button Content="Utwórz zlecenie" Command="{Binding CreateOrderCommand}"/>
                         </StackPanel>
                     </Grid>
@@ -111,7 +112,7 @@
                             <ComboBox ItemsSource="{Binding LaborStrategies}" SelectedItem="{Binding SelectedStrategy}"
                                       DisplayMemberPath="Name" MinWidth="200"/>
                             <TextBlock Text="Stawka/h:"/>
-                            <TextBox Text="{Binding HourlyRate}" Width="60"/>
+                            <TextBox Text="{Binding HourlyRate}" Width="60" local:Placeholder.Text="np. 150"/>
                         </WrapPanel>
                         <WrapPanel>
                             <TextBlock Text="Modyfikator:"/>
@@ -120,8 +121,8 @@
                                 <ComboBoxItem Content="Dopłata procentowa" Tag="percent"/>
                                 <ComboBoxItem Content="Rabat procentowy" Tag="discount"/>
                             </ComboBox>
-                            <TextBox Text="{Binding ModifierLabel}" ToolTip="Opis" MinWidth="140"/>
-                            <TextBox Text="{Binding ModifierValue}" Width="60" ToolTip="Wartość"/>
+                            <TextBox Text="{Binding ModifierLabel}" ToolTip="Opis" MinWidth="140" local:Placeholder.Text="np. Dopłata za ekspres"/>
+                            <TextBox Text="{Binding ModifierValue}" Width="60" ToolTip="Wartość" local:Placeholder.Text="np. 50"/>
                             <Button Content="Dodaj warstwę" Command="{Binding AddModifierCommand}"/>
                             <Button Content="Przelicz cenę" Command="{Binding ComputePriceCommand}"/>
                         </WrapPanel>
