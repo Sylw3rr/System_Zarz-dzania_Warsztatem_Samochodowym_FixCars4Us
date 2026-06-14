@@ -1,0 +1,56 @@
+<UserControl x:Class="FixCars4Us.App.Views.CatalogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- CZĘŚCI -->
+        <GroupBox Grid.Column="0" Header="Katalog części zamiennych">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <TextBlock Text="Nowa część" FontWeight="Bold"/>
+                    <TextBox Text="{Binding NewPartCode}" ToolTip="Kod"/>
+                    <TextBox Text="{Binding NewPartName}" ToolTip="Nazwa"/>
+                    <TextBox Text="{Binding NewPartPurchase}" ToolTip="Cena zakupu"/>
+                    <TextBox Text="{Binding NewPartSale}" ToolTip="Cena sprzedaży"/>
+                    <TextBox Text="{Binding NewPartStock}" ToolTip="Stan magazynowy"/>
+                    <TextBox Text="{Binding NewPartMinStock}" ToolTip="Min. stan"/>
+                    <CheckBox Content="Oryginał" IsChecked="{Binding NewPartIsOriginal}" Margin="4"/>
+                    <Button Content="Dodaj część" Command="{Binding AddPartCommand}"/>
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding Parts}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Kod" Binding="{Binding Code}"/>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Zakup" Binding="{Binding PurchasePrice}"/>
+                        <DataGridTextColumn Header="Sprzedaż" Binding="{Binding SalePrice}"/>
+                        <DataGridTextColumn Header="Stan" Binding="{Binding StockQuantity}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+
+        <!-- USŁUGI -->
+        <GroupBox Grid.Column="1" Header="Cennik usług / roboczogodzin">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <TextBlock Text="Nowa usługa" FontWeight="Bold"/>
+                    <TextBox Text="{Binding NewServiceName}" ToolTip="Nazwa usługi"/>
+                    <ComboBox ItemsSource="{Binding WorkCategories}" SelectedItem="{Binding NewServiceCategory}"/>
+                    <TextBox Text="{Binding NewServiceRate}" ToolTip="Stawka za godzinę"/>
+                    <Button Content="Dodaj usługę" Command="{Binding AddServiceCommand}"/>
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding ServiceTypes}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Kategoria" Binding="{Binding Category}"/>
+                        <DataGridTextColumn Header="Stawka/h" Binding="{Binding HourlyRate}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

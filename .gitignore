@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Baza danych SQLite (tworzona automatycznie przy pierwszym uruchomieniu)
+*.db
+*.db-shm
+*.db-wal
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# Pliki tymczasowe
+*.tmp
