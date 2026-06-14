@@ -1,0 +1,57 @@
+<UserControl x:Class="FixCars4Us.App.Views.InventoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <GroupBox Grid.Column="0" Header="Stany magazynowe">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <TextBlock Text="Ilość:"/>
+                    <TextBox Text="{Binding MovementQuantity}" Width="60"/>
+                    <Button Content="Przychód (+)" Command="{Binding StockInCommand}"/>
+                    <Button Content="Rozchód (−)" Command="{Binding StockOutCommand}"/>
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding Parts}" SelectedItem="{Binding SelectedPart}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Kod" Binding="{Binding Code}"/>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Stan" Binding="{Binding StockQuantity}"/>
+                        <DataGridTextColumn Header="Min" Binding="{Binding MinStock}"/>
+                        <DataGridCheckBoxColumn Header="Niski stan" Binding="{Binding IsLowStock}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+
+        <DockPanel Grid.Column="1">
+            <GroupBox DockPanel.Dock="Top" Header="⚠ Niski stan zapasów">
+                <ItemsControl ItemsSource="{Binding LowStockParts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="DarkRed">
+                                <Run Text="{Binding Name}"/>
+                                <Run Text=" — stan: "/>
+                                <Run Text="{Binding StockQuantity}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </GroupBox>
+            <GroupBox Header="Dziennik ruchów magazynowych">
+                <DataGrid ItemsSource="{Binding Movements}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Czas" Binding="{Binding Time, StringFormat=HH:mm:ss}"/>
+                        <DataGridTextColumn Header="Część" Binding="{Binding Part}" Width="*"/>
+                        <DataGridTextColumn Header="Typ" Binding="{Binding Type}"/>
+                        <DataGridTextColumn Header="Ilość" Binding="{Binding Quantity}"/>
+                        <DataGridTextColumn Header="Po" Binding="{Binding StockAfter}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+        </DockPanel>
+    </Grid>
+</UserControl>

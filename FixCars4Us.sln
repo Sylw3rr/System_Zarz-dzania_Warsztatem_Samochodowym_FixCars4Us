@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0511CD46-66E1-4DD7-B9D0-100B1C25B618}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixCars4Us.Core", "src\FixCars4Us.Core\FixCars4Us.Core.csproj", "{9ACCD8BF-9988-4020-8E00-DF8294426619}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixCars4Us.App", "src\FixCars4Us.App\FixCars4Us.App.csproj", "{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9ACCD8BF-9988-4020-8E00-DF8294426619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ACCD8BF-9988-4020-8E00-DF8294426619}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ACCD8BF-9988-4020-8E00-DF8294426619}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ACCD8BF-9988-4020-8E00-DF8294426619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9ACCD8BF-9988-4020-8E00-DF8294426619} = {0511CD46-66E1-4DD7-B9D0-100B1C25B618}
+		{1B2C3D4E-5F60-4A71-8B92-AC3D4E5F6071} = {0511CD46-66E1-4DD7-B9D0-100B1C25B618}
+	EndGlobalSection
+EndGlobal

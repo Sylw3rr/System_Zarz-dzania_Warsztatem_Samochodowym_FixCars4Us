@@ -1,0 +1,34 @@
+<Application x:Class="FixCars4Us.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!-- Wspólne style aplikacji -->
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="MinWidth" Value="120"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="Padding" Value="10,4"/>
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+        </Style>
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="6"/>
+        </Style>
+    </Application.Resources>
+</Application>
