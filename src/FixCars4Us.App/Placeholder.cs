@@ -64,6 +64,10 @@ internal class PlaceholderAdorner : Adorner
         IsHitTestVisible = false;
     }
 
+    protected override Size MeasureOverride(Size constraint) => AdornedElement.RenderSize;
+
+    protected override Size ArrangeOverride(Size finalSize) => AdornedElement.RenderSize;
+
     protected override void OnRender(DrawingContext drawingContext)
     {
         var textBox = (TextBox)AdornedElement;
