@@ -2,7 +2,7 @@ using System.Windows;
 
 namespace FixCars4Us.App;
 
-public static class Placeholder
+public class Placeholder : DependencyObject
 {
     public static readonly DependencyProperty TextProperty =
         DependencyProperty.Register("Text", typeof(string), typeof(Placeholder), new PropertyMetadata(string.Empty));
