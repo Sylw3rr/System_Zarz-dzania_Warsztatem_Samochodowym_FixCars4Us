@@ -12,20 +12,6 @@
         <Style TargetType="TextBox">
             <Setter Property="Margin" Value="4,2"/>
             <Setter Property="Padding" Value="2"/>
-            <Style.Triggers>
-                <Trigger Property="Text" Value="">
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                <VisualBrush.Visual>
-                                    <TextBlock Text="{Binding (local:Placeholder.Text), RelativeSource={RelativeSource AncestorType=TextBox}}"
-                                               Foreground="Gray" Margin="4,0" FontStyle="Italic"/>
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
         </Style>
         <Style TargetType="ComboBox">
             <Setter Property="Margin" Value="4,2"/>
