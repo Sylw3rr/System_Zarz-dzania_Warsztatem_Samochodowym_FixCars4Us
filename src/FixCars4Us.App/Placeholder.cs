@@ -1,5 +1,8 @@
+using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace FixCars4Us.App;
@@ -21,36 +24,60 @@ public class Placeholder : DependencyObject
         textBox.TextChanged += UpdatePlaceholder;
         textBox.Loaded -= OnLoaded;
         textBox.Loaded += OnLoaded;
+        textBox.SizeChanged -= OnSizeChanged;
+        textBox.SizeChanged += OnSizeChanged;
 
         UpdatePlaceholder(textBox, null);
     }
 
     private static void OnLoaded(object sender, RoutedEventArgs e) => UpdatePlaceholder(sender, null);
+    private static void OnSizeChanged(object sender, SizeChangedEventArgs e) => UpdatePlaceholder(sender, null);
 
     private static void UpdatePlaceholder(object? sender, TextChangedEventArgs? e)
     {
         if (sender is not TextBox textBox) return;
-        var placeholderText = GetText(textBox);
 
+        var layer = AdornerLayer.GetAdornerLayer(textBox);
+        if (layer == null) return;
+
+        var existing = layer.GetAdorners(textBox)?.OfType<PlaceholderAdorner>().ToArray();
+        if (existing != null)
+        {
+            foreach (var adorner in existing) layer.Remove(adorner);
+        }
+
+        var placeholderText = GetText(textBox);
         if (string.IsNullOrEmpty(textBox.Text) && !string.IsNullOrEmpty(placeholderText))
         {
-            textBox.Background = new VisualBrush
-            {
-                AlignmentX = AlignmentX.Left,
-                AlignmentY = AlignmentY.Center,
-                Stretch = Stretch.None,
-                Visual = new TextBlock
-                {
-                    Text = placeholderText,
-                    Foreground = Brushes.Gray,
-                    FontStyle = FontStyles.Italic,
-                    Margin = new Thickness(4, 0, 0, 0)
-                }
-            };
+            layer.Add(new PlaceholderAdorner(textBox, placeholderText));
         }
-        else
-        {
-            textBox.ClearValue(TextBox.BackgroundProperty);
-        }
+    }
+}
+
+internal class PlaceholderAdorner : Adorner
+{
+    private readonly string _text;
+
+    public PlaceholderAdorner(UIElement adornedElement, string text) : base(adornedElement)
+    {
+        _text = text;
+        IsHitTestVisible = false;
+    }
+
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+        var textBox = (TextBox)AdornedElement;
+        var typeface = new Typeface(textBox.FontFamily, FontStyles.Italic, FontWeights.Normal, FontStretches.Normal);
+        var formattedText = new FormattedText(
+            _text,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            textBox.FontSize,
+            Brushes.Gray,
+            VisualTreeHelper.GetDpi(textBox).PixelsPerDip);
+
+        var y = (textBox.ActualHeight - formattedText.Height) / 2;
+        drawingContext.DrawText(formattedText, new Point(textBox.Padding.Left + 4, System.Math.Max(0, y)));
     }
 }
