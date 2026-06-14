@@ -21,7 +21,7 @@
                         <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="Stan" Binding="{Binding StockQuantity}"/>
                         <DataGridTextColumn Header="Min" Binding="{Binding MinStock}"/>
-                        <DataGridCheckBoxColumn Header="Niski stan" Binding="{Binding IsLowStock}"/>
+                        <DataGridCheckBoxColumn Header="Niski stan" Binding="{Binding IsLowStock, Mode=OneWay}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>
