@@ -29,6 +29,7 @@ public class RepairOrdersViewModel : ViewModelBase
     private readonly ManagerAlertObserver _managerObserver;
     private readonly WorkshopMediator _mediator;
     private readonly Dictionary<int, RepairHistory> _histories = new();
+    private readonly List<RelayCommand> _orderDependentCommands;
 
     // --- Kolekcje ---
     public ObservableCollection<RepairOrder> Orders { get; } = new();
@@ -72,9 +73,21 @@ public class RepairOrdersViewModel : ViewModelBase
     public RepairOrder? SelectedOrder
     {
         get => _selectedOrder;
-        set { if (SetField(ref _selectedOrder, value)) OnPropertyChanged(nameof(SelectedOrderLog)); }
+        set
+        {
+            if (SetField(ref _selectedOrder, value))
+            {
+                OnPropertyChanged(nameof(SelectedOrderLog));
+                _orderDependentCommands.RaiseAll();
+            }
+        }
     }
-    public Part? SelectedPart { get; set; }
+    private Part? _selectedPart;
+    public Part? SelectedPart
+    {
+        get => _selectedPart;
+        set { if (SetField(ref _selectedPart, value)) AddPartCommand.RaiseCanExecuteChanged(); }
+    }
     public int PartQuantity { get; set; } = 1;
     public RepairStatus TargetStatus { get; set; }
     public RepairStage TargetStage { get; set; }
@@ -118,6 +131,11 @@ public class RepairOrdersViewModel : ViewModelBase
         UndoCommand = new RelayCommand(Undo, _ => SelectedOrder != null);
         AddModifierCommand = new RelayCommand(AddModifier);
         ComputePriceCommand = new RelayCommand(ComputePrice, _ => SelectedOrder != null);
+
+        _orderDependentCommands = new List<RelayCommand>
+        {
+            ChangeStatusCommand, AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand
+        };
 
         Load();
     }

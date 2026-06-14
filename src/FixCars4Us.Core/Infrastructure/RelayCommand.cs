@@ -28,3 +28,15 @@ public class RelayCommand : ICommand
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }
+
+/// <summary>
+/// Pomocnik wywołujący RaiseCanExecuteChanged na wielu komendach jednocześnie
+/// (np. po zmianie zaznaczonego elementu, od którego zależy CanExecute).
+/// </summary>
+public static class RelayCommandExtensions
+{
+    public static void RaiseAll(this IEnumerable<RelayCommand> commands)
+    {
+        foreach (var c in commands) c.RaiseCanExecuteChanged();
+    }
+}
