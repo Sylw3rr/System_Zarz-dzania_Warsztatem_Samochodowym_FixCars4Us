@@ -1,6 +1,7 @@
 <UserControl x:Class="FixCars4Us.App.Views.AppointmentsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FixCars4Us.App">
     <DockPanel Margin="6">
         <GroupBox DockPanel.Dock="Top" Header="Nowa wizyta (przyjęcie)">
             <WrapPanel>
@@ -11,10 +12,10 @@
                 <TextBlock Text="Data:"/>
                 <DatePicker SelectedDate="{Binding NewDate}" Margin="4,2"/>
                 <TextBlock Text="Godz. start:"/>
-                <TextBox Text="{Binding StartHour}" Width="50"/>
+                <TextBox Text="{Binding StartHour}" Width="50" local:Placeholder.Text="np. 9"/>
                 <TextBlock Text="Czas (h):"/>
-                <TextBox Text="{Binding DurationHours}" Width="50"/>
-                <TextBox Text="{Binding Reason}" ToolTip="Powód wizyty" MinWidth="160"/>
+                <TextBox Text="{Binding DurationHours}" Width="50" local:Placeholder.Text="np. 1.5"/>
+                <TextBox Text="{Binding Reason}" ToolTip="Powód wizyty" MinWidth="160" local:Placeholder.Text="np. Wymiana oleju"/>
                 <Button Content="Zaplanuj wizytę" Command="{Binding AddAppointmentCommand}"/>
             </WrapPanel>
         </GroupBox>
