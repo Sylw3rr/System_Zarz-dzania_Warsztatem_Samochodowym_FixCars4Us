@@ -66,22 +66,34 @@ public class AdvanceStageCommand : IRepairCommand
         return new RepairMemento(_order.Stage, _order.Status, _order.EstimatedHours, snapshot, note);
     }
 
+    /// <summary>Mapowanie etapu naprawy na odpowiadający mu status zlecenia (State).</summary>
+    private static RepairStatus? MapStageToStatus(RepairStage stage) => stage switch
+    {
+        RepairStage.Diagnostyka => RepairStatus.WDiagnostyce,
+        RepairStage.ZamawianieCzesci => RepairStatus.OczekiwanieNaCzesci,
+        RepairStage.PraceWlasciwe => RepairStatus.WNaprawie,
+        RepairStage.KontrolaJakosci => RepairStatus.GotoweDoOdbioru,
+        _ => null
+    };
+
     public void Execute()
     {
         _memento = Capture($"Przed przejściem do {_targetStage}");
 
-        // Przy rozpoczęciu prac właściwych zużywamy części z kosztorysu.
-        if (_targetStage == RepairStage.PraceWlasciwe)
-        {
-            foreach (var item in _order.Items.Where(i => i.PartId.HasValue))
-            {
-                var part = _allParts.FirstOrDefault(p => p.Id == item.PartId);
-                if (part is not null) part.StockQuantity -= item.Quantity;
-            }
-        }
-
         _order.Stage = _targetStage;
         _order.Log.Add(new RepairLogEntry { Message = $"Przejście do etapu: {_targetStage}." });
+
+        // Automatyczna zmiana statusu (State) na podstawie etapu, jeśli przejście jest dozwolone.
+        var mappedStatus = MapStageToStatus(_targetStage);
+        if (mappedStatus is not null && mappedStatus != _order.Status)
+        {
+            var state = RepairStateFactory.Create(_order.Status);
+            if (state.CanTransitionTo(mappedStatus.Value))
+            {
+                _order.Status = mappedStatus.Value;
+                _order.Log.Add(new RepairLogEntry { Message = $"Status automatycznie zmieniony na: {mappedStatus.Value}." });
+            }
+        }
     }
 
     public void Undo()

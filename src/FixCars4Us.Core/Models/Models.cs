@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using FixCars4Us.Core.Enums;
 
 namespace FixCars4Us.Core.Models;
@@ -50,14 +52,32 @@ public class ServiceHistoryEntry
 }
 
 /// <summary>Część zamienna w katalogu i magazynie.</summary>
-public class Part
+public class Part : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
     public int Id { get; set; }
     public string Code { get; set; } = "";
     public string Name { get; set; } = "";
     public decimal PurchasePrice { get; set; }
     public decimal SalePrice { get; set; }
-    public int StockQuantity { get; set; }
+
+    private int _stockQuantity;
+    public int StockQuantity
+    {
+        get => _stockQuantity;
+        set
+        {
+            if (_stockQuantity == value) return;
+            _stockQuantity = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsLowStock));
+        }
+    }
+
     public int MinStock { get; set; } = 2;
     /// <summary>Czy część jest oryginałem (true) czy zamiennikiem (false).</summary>
     public bool IsOriginal { get; set; } = true;

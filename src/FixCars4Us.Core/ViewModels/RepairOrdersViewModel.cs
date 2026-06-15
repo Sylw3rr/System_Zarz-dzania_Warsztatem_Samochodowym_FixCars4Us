@@ -229,8 +229,13 @@ public class RepairOrdersViewModel : ViewModelBase
     {
         if (SelectedOrder is null) return;
         var history = GetHistory(SelectedOrder.Id);
+        var statusBefore = SelectedOrder.Status;
         var cmd = new AdvanceStageCommand(SelectedOrder, TargetStage, _db.Parts.Local.Any() ? _db.Parts.Local.ToList() : _db.Parts.ToList());
         history.Do(cmd);
+
+        if (statusBefore != RepairStatus.GotoweDoOdbioru && SelectedOrder.Status == RepairStatus.GotoweDoOdbioru)
+            _facade.RecordCompletion(SelectedOrder);
+
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
         RefreshSelectedOrderRow();
