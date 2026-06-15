@@ -86,6 +86,13 @@ public class CustomersViewModel : ViewModelBase
         foreach (var c in _db.Customers.OrderBy(c => c.Name)) Customers.Add(c);
     }
 
+    /// <summary>Odświeża pojazdy i historię serwisową bieżącego wyboru (np. po zmianie zakładki).</summary>
+    public void Refresh()
+    {
+        LoadVehicles();
+        LoadHistory();
+    }
+
     private void LoadVehicles()
     {
         Vehicles.Clear();

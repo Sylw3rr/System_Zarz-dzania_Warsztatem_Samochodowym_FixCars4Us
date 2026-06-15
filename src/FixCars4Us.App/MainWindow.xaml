@@ -13,7 +13,7 @@
             </StackPanel>
         </Border>
 
-        <TabControl Margin="6">
+        <TabControl Margin="6" SelectionChanged="MainTabs_SelectionChanged">
             <TabItem Header="Klienci i pojazdy">
                 <views:CustomersView DataContext="{Binding Customers}"/>
             </TabItem>

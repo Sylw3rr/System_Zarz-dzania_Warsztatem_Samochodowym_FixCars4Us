@@ -47,12 +47,18 @@ public class WNaprawieState : IRepairState
 public class GotoweDoOdbioruState : IRepairState
 {
     public RepairStatus Status => RepairStatus.GotoweDoOdbioru;
-    public IReadOnlyList<RepairStatus> AllowedNext { get; } = Array.Empty<RepairStatus>();
+    public IReadOnlyList<RepairStatus> AllowedNext { get; } = new[] { RepairStatus.Zakonczone };
 }
 
 public class AnulowaneState : IRepairState
 {
     public RepairStatus Status => RepairStatus.Anulowane;
+    public IReadOnlyList<RepairStatus> AllowedNext { get; } = Array.Empty<RepairStatus>();
+}
+
+public class ZakonczoneState : IRepairState
+{
+    public RepairStatus Status => RepairStatus.Zakonczone;
     public IReadOnlyList<RepairStatus> AllowedNext { get; } = Array.Empty<RepairStatus>();
 }
 
@@ -67,6 +73,7 @@ public static class RepairStateFactory
         RepairStatus.WNaprawie => new WNaprawieState(),
         RepairStatus.GotoweDoOdbioru => new GotoweDoOdbioruState(),
         RepairStatus.Anulowane => new AnulowaneState(),
+        RepairStatus.Zakonczone => new ZakonczoneState(),
         _ => throw new ArgumentOutOfRangeException(nameof(status))
     };
 }

@@ -37,6 +37,7 @@ public class RepairOrdersViewModel : ViewModelBase
     public ObservableCollection<Mechanic> Mechanics { get; } = new();
     public ObservableCollection<Lift> Lifts { get; } = new();
     public ObservableCollection<Part> Parts { get; } = new();
+    public ObservableCollection<ReceptionStation> Stations { get; } = new();
     public ObservableCollection<string> Notifications { get; } = new();
     public ObservableCollection<string> PriceBreakdown { get; } = new();
     public ObservableCollection<PriceModifier> Modifiers { get; } = new();
@@ -103,6 +104,7 @@ public class RepairOrdersViewModel : ViewModelBase
     public RelayCommand AddPartCommand { get; }
     public RelayCommand AdvanceStageCommand { get; }
     public RelayCommand UndoCommand { get; }
+    public RelayCommand FinishOrderCommand { get; }
     public RelayCommand AddModifierCommand { get; }
     public RelayCommand ComputePriceCommand { get; }
 
@@ -131,10 +133,12 @@ public class RepairOrdersViewModel : ViewModelBase
         UndoCommand = new RelayCommand(Undo, _ => SelectedOrder != null);
         AddModifierCommand = new RelayCommand(AddModifier);
         ComputePriceCommand = new RelayCommand(ComputePrice, _ => SelectedOrder != null);
+        FinishOrderCommand = new RelayCommand(FinishOrder,
+            _ => SelectedOrder != null && RepairStateFactory.Create(SelectedOrder.Status).CanTransitionTo(RepairStatus.Zakonczone));
 
         _orderDependentCommands = new List<RelayCommand>
         {
-            ChangeStatusCommand, AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand
+            ChangeStatusCommand, AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand, FinishOrderCommand
         };
 
         Load();
@@ -150,13 +154,20 @@ public class RepairOrdersViewModel : ViewModelBase
         foreach (var l in _db.Lifts) Lifts.Add(l);
         Parts.Clear();
         foreach (var p in _db.Parts) Parts.Add(p);
+        Stations.Clear();
+        foreach (var s in _db.ReceptionStations) Stations.Add(s);
         ReloadOrders();
     }
 
+    /// <summary>Odświeża listę zleceń bez resetowania pozostałych danych (np. po zmianie zakładki).</summary>
+    public void Refresh() => ReloadOrders();
+
     private void ReloadOrders()
     {
+        var selectedId = SelectedOrder?.Id;
         Orders.Clear();
-        foreach (var o in _facade.LoadOrders()) Orders.Add(o);
+        foreach (var o in _facade.LoadOrders().Where(o => o.Status != RepairStatus.Zakonczone)) Orders.Add(o);
+        SelectedOrder = selectedId is null ? null : Orders.FirstOrDefault(o => o.Id == selectedId);
     }
 
     private void Log(string msg)
@@ -188,6 +199,23 @@ public class RepairOrdersViewModel : ViewModelBase
 
         var order = builder.Build();
         _facade.PersistNewOrder(order);
+
+        // Rezerwacja terminu w Kalendarzu przyjęć na czas naprawy (jeśli jest wolne stanowisko).
+        var freeStation = _db.ReceptionStations.FirstOrDefault(s => !_db.Appointments.Any(a =>
+            a.ReceptionStationId == s.Id && start < a.End && a.Start < end));
+        if (freeStation is not null)
+        {
+            _db.Appointments.Add(new Appointment
+            {
+                VehicleId = NewVehicle.Id,
+                ReceptionStationId = freeStation.Id,
+                Start = start,
+                End = end,
+                Reason = NewFault
+            });
+            _db.SaveChanges();
+        }
+
         ReloadOrders();
         SelectedOrder = Orders.FirstOrDefault(o => o.Id == order.Id);
         Log($"Utworzono zlecenie #{order.Id}. Mediator: {alloc.Message}");
@@ -261,6 +289,19 @@ public class RepairOrdersViewModel : ViewModelBase
             _histories[orderId] = h;
         }
         return h;
+    }
+
+    /// <summary>Kończy zlecenie (wydanie pojazdu klientowi) i usuwa je z listy aktywnych zleceń.</summary>
+    private void FinishOrder(object? _)
+    {
+        if (SelectedOrder is null) return;
+        var (ok, msg) = _facade.ChangeStatus(SelectedOrder, RepairStatus.Zakonczone);
+        Log(msg);
+        if (ok)
+        {
+            Orders.Remove(SelectedOrder);
+            SelectedOrder = null;
+        }
     }
 
     private void AddModifier(object? _)

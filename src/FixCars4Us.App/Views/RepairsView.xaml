@@ -101,6 +101,9 @@
                             <Button Content="Wykonaj etap" Command="{Binding AdvanceStageCommand}"/>
                             <Button Content="↶ Cofnij (Undo/Memento)" Command="{Binding UndoCommand}"/>
                         </WrapPanel>
+                        <WrapPanel>
+                            <Button Content="✔ Zakończ zlecenie (wydanie pojazdu)" Command="{Binding FinishOrderCommand}"/>
+                        </WrapPanel>
                     </StackPanel>
                 </GroupBox>
 
