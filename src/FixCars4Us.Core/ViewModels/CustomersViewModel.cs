@@ -43,7 +43,6 @@ public class CustomersViewModel : ViewModelBase
             if (SetField(ref _selectedVehicle, value))
             {
                 LoadHistory();
-                AddHistoryCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -62,21 +61,14 @@ public class CustomersViewModel : ViewModelBase
     public string NewVehicleModel { get; set; } = "";
     public int NewVehicleMileage { get; set; }
 
-    // --- Pola formularza wpisu historii ---
-    public string NewHistoryDescription { get; set; } = "";
-    public int NewHistoryMileage { get; set; }
-    public decimal NewHistoryCost { get; set; }
-
     public RelayCommand AddCustomerCommand { get; }
     public RelayCommand AddVehicleCommand { get; }
-    public RelayCommand AddHistoryCommand { get; }
 
     public CustomersViewModel(WorkshopContext db)
     {
         _db = db;
         AddCustomerCommand = new RelayCommand(AddCustomer);
         AddVehicleCommand = new RelayCommand(AddVehicle, _ => SelectedCustomer != null);
-        AddHistoryCommand = new RelayCommand(AddHistory, _ => SelectedVehicle != null);
         Load();
     }
 
@@ -142,21 +134,5 @@ public class CustomersViewModel : ViewModelBase
         _db.Vehicles.Add(v);
         _db.SaveChanges();
         Vehicles.Add(v);
-    }
-
-    private void AddHistory(object? _)
-    {
-        if (SelectedVehicle is null || string.IsNullOrWhiteSpace(NewHistoryDescription)) return;
-        var h = new ServiceHistoryEntry
-        {
-            VehicleId = SelectedVehicle.Id,
-            Description = NewHistoryDescription,
-            MileageAtService = NewHistoryMileage,
-            Cost = NewHistoryCost,
-            Date = DateTime.Now
-        };
-        _db.ServiceHistory.Add(h);
-        _db.SaveChanges();
-        History.Insert(0, h);
     }
 }

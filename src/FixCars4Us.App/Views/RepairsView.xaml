@@ -101,9 +101,6 @@
                             <Button Content="Wykonaj etap" Command="{Binding AdvanceStageCommand}"/>
                             <Button Content="↶ Cofnij (Undo/Memento)" Command="{Binding UndoCommand}"/>
                         </WrapPanel>
-                        <WrapPanel>
-                            <Button Content="✔ Zakończ zlecenie (wydanie pojazdu)" Command="{Binding FinishOrderCommand}"/>
-                        </WrapPanel>
                     </StackPanel>
                 </GroupBox>
 
@@ -153,6 +150,11 @@
                 </GroupBox>
 
                 <TextBlock Text="{Binding Status}" Foreground="DarkBlue" FontWeight="Bold" TextWrapping="Wrap" Margin="6"/>
+
+                <Button Content="✔ ZAKOŃCZ ZLECENIE (wydanie pojazdu klientowi)"
+                        Command="{Binding FinishOrderCommand}"
+                        FontWeight="Bold" FontSize="14" Padding="8" Margin="6,12,6,6"
+                        Background="DarkGreen" Foreground="White"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

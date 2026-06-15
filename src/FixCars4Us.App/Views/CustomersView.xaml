@@ -67,16 +67,6 @@
         <!-- HISTORIA SERWISOWA -->
         <GroupBox Grid.Column="2" Header="Historia serwisowa pojazdu">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Bottom">
-                    <TextBlock Text="Nowy wpis historii" FontWeight="Bold"/>
-                    <TextBlock Text="Opis (np. Wymiana oleju)" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewHistoryDescription}"/>
-                    <TextBlock Text="Przebieg km (np. 125000)" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewHistoryMileage}"/>
-                    <TextBlock Text="Koszt zł (np. 250)" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewHistoryCost}"/>
-                    <Button Content="Dodaj wpis" Command="{Binding AddHistoryCommand}"/>
-                </StackPanel>
                 <DataGrid ItemsSource="{Binding History}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Data" Binding="{Binding Date, StringFormat=d}"/>
