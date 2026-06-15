@@ -92,7 +92,7 @@ public class RepairOrdersViewModel : ViewModelBase
     public RepairStatus TargetStatus { get; set; }
     public RepairStage TargetStage { get; set; }
 
-    public IEnumerable<RepairLogEntry> SelectedOrderLog => SelectedOrder?.Log ?? Enumerable.Empty<RepairLogEntry>();
+    public IEnumerable<RepairLogEntry> SelectedOrderLog => SelectedOrder?.Log.ToList() ?? Enumerable.Empty<RepairLogEntry>();
 
     private string _status = "";
     public string Status { get => _status; set => SetField(ref _status, value); }
@@ -193,6 +193,14 @@ public class RepairOrdersViewModel : ViewModelBase
         Log($"Utworzono zlecenie #{order.Id}. Mediator: {alloc.Message}");
     }
 
+    /// <summary>Wymusza odświeżenie wiersza zaznaczonego zlecenia w DataGridzie (model nie wysyła PropertyChanged).</summary>
+    private void RefreshSelectedOrderRow()
+    {
+        if (SelectedOrder is null) return;
+        var idx = Orders.IndexOf(SelectedOrder);
+        if (idx >= 0) Orders[idx] = SelectedOrder;
+    }
+
     private void ChangeStatus(object? _)
     {
         if (SelectedOrder is null) return;
@@ -203,6 +211,7 @@ public class RepairOrdersViewModel : ViewModelBase
             foreach (var m in _emailObserver.SentMessages.AsEnumerable().Reverse().Take(1))
                 Notifications.Insert(0, m);
             OnPropertyChanged(nameof(SelectedOrderLog));
+            RefreshSelectedOrderRow();
         }
     }
 
@@ -224,6 +233,7 @@ public class RepairOrdersViewModel : ViewModelBase
         history.Do(cmd);
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
+        RefreshSelectedOrderRow();
         Log($"Wykonano komendę: {cmd.Description}. W historii: {history.Count} operacji.");
     }
 
@@ -234,6 +244,7 @@ public class RepairOrdersViewModel : ViewModelBase
         var msg = history.Undo();
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
+        RefreshSelectedOrderRow();
         Log(msg);
     }
 
