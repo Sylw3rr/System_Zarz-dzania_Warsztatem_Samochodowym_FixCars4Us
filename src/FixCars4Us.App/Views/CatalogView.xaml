@@ -13,12 +13,18 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowa część" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewPartCode}" ToolTip="Kod" local:Placeholder.Text="np. FLT-001"/>
-                    <TextBox Text="{Binding NewPartName}" ToolTip="Nazwa" local:Placeholder.Text="np. Filtr oleju"/>
-                    <TextBox Text="{Binding NewPartPurchase}" ToolTip="Cena zakupu" local:Placeholder.Text="np. 25.00"/>
-                    <TextBox Text="{Binding NewPartSale}" ToolTip="Cena sprzedaży" local:Placeholder.Text="np. 45.00"/>
-                    <TextBox Text="{Binding NewPartStock}" ToolTip="Stan magazynowy" local:Placeholder.Text="np. 10"/>
-                    <TextBox Text="{Binding NewPartMinStock}" ToolTip="Min. stan" local:Placeholder.Text="np. 2"/>
+                    <TextBlock Text="Kod (np. FLT-001)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartCode}"/>
+                    <TextBlock Text="Nazwa (np. Filtr oleju)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartName}"/>
+                    <TextBlock Text="Cena zakupu zł (np. 25.00)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartPurchase}"/>
+                    <TextBlock Text="Cena sprzedaży zł (np. 45.00)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartSale}"/>
+                    <TextBlock Text="Stan magazynowy (np. 10)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartStock}"/>
+                    <TextBlock Text="Min. stan (np. 2)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewPartMinStock}"/>
                     <CheckBox Content="Oryginał" IsChecked="{Binding NewPartIsOriginal}" Margin="4"/>
                     <Button Content="Dodaj część" Command="{Binding AddPartCommand}"/>
                 </StackPanel>
@@ -39,9 +45,12 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowa usługa" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewServiceName}" ToolTip="Nazwa usługi" local:Placeholder.Text="np. Wymiana oleju"/>
+                    <TextBlock Text="Nazwa usługi (np. Wymiana oleju)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewServiceName}"/>
+                    <TextBlock Text="Kategoria prac" Foreground="Gray"/>
                     <ComboBox ItemsSource="{Binding WorkCategories}" SelectedItem="{Binding NewServiceCategory}"/>
-                    <TextBox Text="{Binding NewServiceRate}" ToolTip="Stawka za godzinę" local:Placeholder.Text="np. 120"/>
+                    <TextBlock Text="Stawka za godzinę zł (np. 120)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewServiceRate}"/>
                     <Button Content="Dodaj usługę" Command="{Binding AddServiceCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding ServiceTypes}">
