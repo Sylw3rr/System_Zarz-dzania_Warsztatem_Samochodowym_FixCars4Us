@@ -54,8 +54,8 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Pojazd:"/>
                         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Vehicles}" SelectedItem="{Binding NewVehicle}"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Usterka:"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewFault}" local:Placeholder.Text="np. Stuk w przedniej zawieszeniu"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Usterka (np. Stuk w zawieszeniu):"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewFault}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Specjalizacja:"/>
                         <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Specializations}" SelectedItem="{Binding NewSpecialization}"/>
@@ -63,19 +63,19 @@
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Typ podnośnika:"/>
                         <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding LiftTypes}" SelectedItem="{Binding NewLiftType}"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Wymagany udźwig (kg):"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding NewCapacityKg}" local:Placeholder.Text="np. 2000"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Wymagany udźwig kg (np. 2000):"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding NewCapacityKg}"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Szac. czas (h):"/>
-                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding NewEstimatedHours}" local:Placeholder.Text="np. 3"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Szac. czas h (np. 3):"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding NewEstimatedHours}"/>
 
                         <CheckBox Grid.Row="6" Grid.Column="1" Content="Wymaga narzędzia diagnostycznego" IsChecked="{Binding NewRequiresTool}" Margin="4"/>
 
                         <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal">
                             <TextBlock Text="Data:"/>
                             <DatePicker SelectedDate="{Binding NewDate}"/>
-                            <TextBlock Text="Godz:"/>
-                            <TextBox Text="{Binding NewStartHour}" Width="45" local:Placeholder.Text="np. 9"/>
+                            <TextBlock Text="Godz (np. 9):"/>
+                            <TextBox Text="{Binding NewStartHour}" Width="45"/>
                             <Button Content="Utwórz zlecenie" Command="{Binding CreateOrderCommand}"/>
                         </StackPanel>
                     </Grid>
@@ -111,8 +111,8 @@
                             <TextBlock Text="Strategia robocizny:"/>
                             <ComboBox ItemsSource="{Binding LaborStrategies}" SelectedItem="{Binding SelectedStrategy}"
                                       DisplayMemberPath="Name" MinWidth="200"/>
-                            <TextBlock Text="Stawka/h:"/>
-                            <TextBox Text="{Binding HourlyRate}" Width="60" local:Placeholder.Text="np. 150"/>
+                            <TextBlock Text="Stawka/h (np. 150):"/>
+                            <TextBox Text="{Binding HourlyRate}" Width="60"/>
                         </WrapPanel>
                         <WrapPanel>
                             <TextBlock Text="Modyfikator:"/>
@@ -121,8 +121,10 @@
                                 <ComboBoxItem Content="Dopłata procentowa" Tag="percent"/>
                                 <ComboBoxItem Content="Rabat procentowy" Tag="discount"/>
                             </ComboBox>
-                            <TextBox Text="{Binding ModifierLabel}" ToolTip="Opis" MinWidth="140" local:Placeholder.Text="np. Dopłata za ekspres"/>
-                            <TextBox Text="{Binding ModifierValue}" Width="60" ToolTip="Wartość" local:Placeholder.Text="np. 50"/>
+                            <TextBlock Text="Opis (np. Dopłata za ekspres):"/>
+                            <TextBox Text="{Binding ModifierLabel}" MinWidth="140"/>
+                            <TextBlock Text="Wartość (np. 50):"/>
+                            <TextBox Text="{Binding ModifierValue}" Width="60"/>
                             <Button Content="Dodaj warstwę" Command="{Binding AddModifierCommand}"/>
                             <Button Content="Przelicz cenę" Command="{Binding ComputePriceCommand}"/>
                         </WrapPanel>

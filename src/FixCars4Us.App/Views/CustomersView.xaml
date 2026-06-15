@@ -14,11 +14,16 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy klient" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewCustomerName}" ToolTip="Nazwa / imię i nazwisko" local:Placeholder.Text="np. Jan Kowalski"/>
-                    <TextBox Text="{Binding NewCustomerPhone}" ToolTip="Telefon" local:Placeholder.Text="np. 600 123 456"/>
-                    <TextBox Text="{Binding NewCustomerEmail}" ToolTip="E-mail" local:Placeholder.Text="np. jan.kowalski@email.pl"/>
+                    <TextBlock Text="Nazwa / imię i nazwisko (np. Jan Kowalski)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewCustomerName}"/>
+                    <TextBlock Text="Telefon (np. 600 123 456)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewCustomerPhone}"/>
+                    <TextBlock Text="E-mail (np. jan.kowalski@email.pl)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewCustomerEmail}"/>
+                    <TextBlock Text="Typ klienta" Foreground="Gray"/>
                     <ComboBox ItemsSource="{Binding CustomerTypes}" SelectedItem="{Binding NewCustomerType}"/>
-                    <TextBox Text="{Binding NewCustomerDiscount}" ToolTip="Rabat stały %" local:Placeholder.Text="np. 5"/>
+                    <TextBlock Text="Rabat stały % (np. 5)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewCustomerDiscount}"/>
                     <Button Content="Dodaj klienta" Command="{Binding AddCustomerCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
@@ -36,11 +41,16 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy pojazd" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewVehicleReg}" ToolTip="Nr rejestracyjny" local:Placeholder.Text="np. WA12345"/>
-                    <TextBox Text="{Binding NewVehicleVin}" ToolTip="VIN" local:Placeholder.Text="np. WVWZZZ1JZXW000001"/>
-                    <TextBox Text="{Binding NewVehicleBrand}" ToolTip="Marka" local:Placeholder.Text="np. Volkswagen"/>
-                    <TextBox Text="{Binding NewVehicleModel}" ToolTip="Model" local:Placeholder.Text="np. Golf"/>
-                    <TextBox Text="{Binding NewVehicleMileage}" ToolTip="Przebieg" local:Placeholder.Text="np. 120000"/>
+                    <TextBlock Text="Nr rejestracyjny (np. WA12345)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewVehicleReg}"/>
+                    <TextBlock Text="VIN (np. WVWZZZ1JZXW000001)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewVehicleVin}"/>
+                    <TextBlock Text="Marka (np. Volkswagen)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewVehicleBrand}"/>
+                    <TextBlock Text="Model (np. Golf)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewVehicleModel}"/>
+                    <TextBlock Text="Przebieg km (np. 120000)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewVehicleMileage}"/>
                     <Button Content="Dodaj pojazd" Command="{Binding AddVehicleCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Vehicles}" SelectedItem="{Binding SelectedVehicle}">
@@ -59,9 +69,12 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
                     <TextBlock Text="Nowy wpis historii" FontWeight="Bold"/>
-                    <TextBox Text="{Binding NewHistoryDescription}" ToolTip="Opis" local:Placeholder.Text="np. Wymiana oleju"/>
-                    <TextBox Text="{Binding NewHistoryMileage}" ToolTip="Przebieg" local:Placeholder.Text="np. 125000"/>
-                    <TextBox Text="{Binding NewHistoryCost}" ToolTip="Koszt" local:Placeholder.Text="np. 250"/>
+                    <TextBlock Text="Opis (np. Wymiana oleju)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewHistoryDescription}"/>
+                    <TextBlock Text="Przebieg km (np. 125000)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewHistoryMileage}"/>
+                    <TextBlock Text="Koszt zł (np. 250)" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewHistoryCost}"/>
                     <Button Content="Dodaj wpis" Command="{Binding AddHistoryCommand}"/>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding History}">
