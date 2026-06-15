@@ -180,8 +180,13 @@ public class RepairLogEntry
 /// Zlecenie naprawy — centralny agregat systemu.
 /// Tworzone Builderem, posiada stan (State), etap (Command+Memento) i kosztorys (Decorator/Strategy).
 /// </summary>
-public class RepairOrder
+public class RepairOrder : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public string FaultDescription { get; set; } = "";
@@ -198,8 +203,29 @@ public class RepairOrder
     public int? SpecialToolId { get; set; }
     public SpecialTool? SpecialTool { get; set; }
 
-    public RepairStatus Status { get; set; } = RepairStatus.Przyjete;
-    public RepairStage Stage { get; set; } = RepairStage.Diagnostyka;
+    private RepairStatus _status = RepairStatus.Przyjete;
+    public RepairStatus Status
+    {
+        get => _status;
+        set
+        {
+            if (_status == value) return;
+            _status = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private RepairStage _stage = RepairStage.Diagnostyka;
+    public RepairStage Stage
+    {
+        get => _stage;
+        set
+        {
+            if (_stage == value) return;
+            _stage = value;
+            OnPropertyChanged();
+        }
+    }
 
     public decimal EstimatedHours { get; set; }
 
