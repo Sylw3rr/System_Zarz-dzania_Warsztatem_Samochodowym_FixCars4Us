@@ -44,7 +44,8 @@ public enum RepairStatus
     OczekiwanieNaCzesci,
     WNaprawie,
     GotoweDoOdbioru,
-    Anulowane
+    Anulowane,
+    Zakonczone
 }
 
 /// <summary>Etapy procesu naprawy (Command + Memento, funkcja cofania).</summary>

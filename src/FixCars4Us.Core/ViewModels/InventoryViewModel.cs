@@ -65,6 +65,9 @@ public class InventoryViewModel : ViewModelBase
         OnPropertyChanged(nameof(LowStockParts));
     }
 
+    /// <summary>Odświeża alert niskich stanów (np. po zmianie zakładki).</summary>
+    public void Refresh() => OnPropertyChanged(nameof(LowStockParts));
+
     private void Move(StockMovementType type)
     {
         if (SelectedPart is null || MovementQuantity <= 0) return;

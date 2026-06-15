@@ -47,6 +47,9 @@ public class AppointmentsViewModel : ViewModelBase
         ReloadAppointments();
     }
 
+    /// <summary>Odświeża listę wizyt (np. po dodaniu zlecenia naprawy w innej zakładce).</summary>
+    public void Refresh() => ReloadAppointments();
+
     private void ReloadAppointments()
     {
         Appointments.Clear();
