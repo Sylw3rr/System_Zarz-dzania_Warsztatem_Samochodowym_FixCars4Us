@@ -33,13 +33,11 @@ public class ManufacturerNormLaborStrategy : ILaborCostStrategy
         => Math.Round(order.EstimatedHours * 1.15m, 2) * hourlyRate;
 }
 
-/// <summary>Ryczałt za konkretną usługę (stała kwota niezależna od czasu).</summary>
+/// <summary>Ryczałt za konkretną usługę — stała kwota niezależna od liczby godzin (podana w polu stawki).</summary>
 public class FlatRateLaborStrategy : ILaborCostStrategy
 {
-    private readonly decimal _flat;
-    public FlatRateLaborStrategy(decimal flat) => _flat = flat;
     public string Name => "Ryczałt";
-    public decimal CalculateLaborCost(RepairOrder order, decimal hourlyRate) => _flat;
+    public decimal CalculateLaborCost(RepairOrder order, decimal hourlyRate) => hourlyRate;
 }
 
 // ---------------------------------------------------------------------

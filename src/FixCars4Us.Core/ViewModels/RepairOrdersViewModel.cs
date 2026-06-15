@@ -45,7 +45,6 @@ public class RepairOrdersViewModel : ViewModelBase
 
     public Array Specializations => Enum.GetValues(typeof(MechanicSpecialization));
     public Array LiftTypes => Enum.GetValues(typeof(LiftType));
-    public Array Statuses => Enum.GetValues(typeof(RepairStatus));
     public Array Stages => Enum.GetValues(typeof(RepairStage));
 
     // --- Formularz nowego zlecenia (Builder + Mediator) ---
@@ -62,8 +61,37 @@ public class RepairOrdersViewModel : ViewModelBase
     // --- Wycena ---
     public decimal HourlyRate { get; set; } = 150;
     private ILaborCostStrategy? _selectedStrategy;
-    public ILaborCostStrategy? SelectedStrategy { get => _selectedStrategy; set => SetField(ref _selectedStrategy, value); }
-    public string ModifierKind { get; set; } = "surcharge"; // surcharge|percent|discount
+    public ILaborCostStrategy? SelectedStrategy
+    {
+        get => _selectedStrategy;
+        set
+        {
+            if (SetField(ref _selectedStrategy, value))
+                OnPropertyChanged(nameof(LaborInputLabel));
+        }
+    }
+
+    /// <summary>Etykieta pola stawki — zależna od wybranej strategii robocizny (Strategy).</summary>
+    public string LaborInputLabel => SelectedStrategy is FlatRateLaborStrategy
+        ? "Kwota ryczałtu (zł, np. 500):"
+        : "Stawka za godzinę (zł, np. 150):";
+
+    private string _modifierKind = "surcharge"; // surcharge|percent|discount
+    public string ModifierKind
+    {
+        get => _modifierKind;
+        set
+        {
+            if (SetField(ref _modifierKind, value))
+                OnPropertyChanged(nameof(ModifierValueLabel));
+        }
+    }
+
+    /// <summary>Etykieta pola wartości modyfikatora — zł dla dopłaty kwotowej, % dla procentowych.</summary>
+    public string ModifierValueLabel => ModifierKind == "surcharge"
+        ? "Wartość (zł, np. 50):"
+        : "Wartość (%, np. 10):";
+
     public string ModifierLabel { get; set; } = "";
     public decimal ModifierValue { get; set; }
     private decimal _finalPrice;
@@ -90,7 +118,6 @@ public class RepairOrdersViewModel : ViewModelBase
         set { if (SetField(ref _selectedPart, value)) AddPartCommand.RaiseCanExecuteChanged(); }
     }
     public int PartQuantity { get; set; } = 1;
-    public RepairStatus TargetStatus { get; set; }
     public RepairStage TargetStage { get; set; }
 
     public IEnumerable<RepairLogEntry> SelectedOrderLog => SelectedOrder?.Log.ToList() ?? Enumerable.Empty<RepairLogEntry>();
@@ -100,7 +127,6 @@ public class RepairOrdersViewModel : ViewModelBase
 
     // --- Komendy ---
     public RelayCommand CreateOrderCommand { get; }
-    public RelayCommand ChangeStatusCommand { get; }
     public RelayCommand AddPartCommand { get; }
     public RelayCommand AdvanceStageCommand { get; }
     public RelayCommand UndoCommand { get; }
@@ -123,11 +149,10 @@ public class RepairOrdersViewModel : ViewModelBase
 
         LaborStrategies.Add(new TimeBasedLaborStrategy());
         LaborStrategies.Add(new ManufacturerNormLaborStrategy());
-        LaborStrategies.Add(new FlatRateLaborStrategy(500));
+        LaborStrategies.Add(new FlatRateLaborStrategy());
         SelectedStrategy = LaborStrategies[0];
 
         CreateOrderCommand = new RelayCommand(CreateOrder);
-        ChangeStatusCommand = new RelayCommand(ChangeStatus, _ => SelectedOrder != null);
         AddPartCommand = new RelayCommand(AddPart, _ => SelectedOrder != null && SelectedPart != null);
         AdvanceStageCommand = new RelayCommand(AdvanceStage, _ => SelectedOrder != null);
         UndoCommand = new RelayCommand(Undo, _ => SelectedOrder != null);
@@ -138,7 +163,7 @@ public class RepairOrdersViewModel : ViewModelBase
 
         _orderDependentCommands = new List<RelayCommand>
         {
-            ChangeStatusCommand, AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand, FinishOrderCommand
+            AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand, FinishOrderCommand
         };
 
         Load();
@@ -227,20 +252,6 @@ public class RepairOrdersViewModel : ViewModelBase
         if (SelectedOrder is null) return;
         var idx = Orders.IndexOf(SelectedOrder);
         if (idx >= 0) Orders[idx] = SelectedOrder;
-    }
-
-    private void ChangeStatus(object? _)
-    {
-        if (SelectedOrder is null) return;
-        var (ok, msg) = _facade.ChangeStatus(SelectedOrder, TargetStatus);
-        Log(msg);
-        if (ok)
-        {
-            foreach (var m in _emailObserver.SentMessages.AsEnumerable().Reverse().Take(1))
-                Notifications.Insert(0, m);
-            OnPropertyChanged(nameof(SelectedOrderLog));
-            RefreshSelectedOrderRow();
-        }
     }
 
     private void AddPart(object? _)
