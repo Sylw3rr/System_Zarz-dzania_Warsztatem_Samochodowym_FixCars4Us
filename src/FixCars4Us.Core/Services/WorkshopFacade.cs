@@ -35,10 +35,32 @@ public class WorkshopFacade
 
         order.Status = target;
         order.Log.Add(new RepairLogEntry { Message = $"Zmiana statusu na: {target}." });
+
+        if (target == RepairStatus.GotoweDoOdbioru)
+            RecordCompletion(order);
+
         _db.SaveChanges();
 
         _notifier.Notify(order, $"Status naprawy zmieniono na „{target}”.");
         return (true, $"Status zmieniony na {target}.");
+    }
+
+    /// <summary>
+    /// Dopisuje wpis do historii serwisowej pojazdu po zakończeniu naprawy
+    /// (status "Gotowe do odbioru"). Wywoływane zarówno przy ręcznej zmianie
+    /// statusu, jak i przy automatycznym przejściu statusu wynikającym z etapu.
+    /// </summary>
+    public void RecordCompletion(RepairOrder order)
+    {
+        if (order.Vehicle is null) return;
+        _db.ServiceHistory.Add(new ServiceHistoryEntry
+        {
+            VehicleId = order.VehicleId,
+            Date = DateTime.Now,
+            Description = $"Naprawa: {order.FaultDescription}",
+            MileageAtService = order.Vehicle.Mileage,
+            Cost = order.ItemsTotal
+        });
     }
 
     /// <summary>

@@ -27,8 +27,7 @@ public class PricingService
         var partsTotal = order.Items.Where(i => i.PartId.HasValue).Sum(i => i.LineTotal);
         var laborCost = laborStrategy.CalculateLaborCost(order, hourlyRate);
 
-        IPriceComponent price = new BasePrice(partsTotal + laborCost,
-            $"Części + robocizna ({laborStrategy.Name})");
+        IPriceComponent price = new BaseCost(partsTotal, laborCost, laborStrategy.Name);
 
         foreach (var m in modifiers)
         {

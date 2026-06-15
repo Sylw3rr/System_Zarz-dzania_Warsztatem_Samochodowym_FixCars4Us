@@ -66,6 +66,29 @@ public class BasePrice : IPriceComponent
     public IEnumerable<(string, decimal)> Breakdown() { yield return (_label, _amount); }
 }
 
+/// <summary>Cena bazowa z rozbiciem na części i robociznę.</summary>
+public class BaseCost : IPriceComponent
+{
+    private readonly decimal _partsTotal;
+    private readonly decimal _laborCost;
+    private readonly string _laborLabel;
+
+    public BaseCost(decimal partsTotal, decimal laborCost, string laborLabel)
+    {
+        _partsTotal = partsTotal;
+        _laborCost = laborCost;
+        _laborLabel = laborLabel;
+    }
+
+    public decimal GetPrice() => _partsTotal + _laborCost;
+
+    public IEnumerable<(string, decimal)> Breakdown()
+    {
+        yield return ("Części", _partsTotal);
+        yield return ($"Robocizna ({_laborLabel})", _laborCost);
+    }
+}
+
 /// <summary>
 /// WZORZEC: Decorator.
 /// Bazowy dekorator pozwalający "nakładać" kolejne warstwy kosztów/zniżek
