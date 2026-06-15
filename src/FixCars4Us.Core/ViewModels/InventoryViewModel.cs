@@ -32,7 +32,14 @@ public class InventoryViewModel : ViewModelBase
     public Part? SelectedPart
     {
         get => _selectedPart;
-        set => SetField(ref _selectedPart, value);
+        set
+        {
+            if (SetField(ref _selectedPart, value))
+            {
+                StockInCommand.RaiseCanExecuteChanged();
+                StockOutCommand.RaiseCanExecuteChanged();
+            }
+        }
     }
 
     public int MovementQuantity { get; set; } = 1;

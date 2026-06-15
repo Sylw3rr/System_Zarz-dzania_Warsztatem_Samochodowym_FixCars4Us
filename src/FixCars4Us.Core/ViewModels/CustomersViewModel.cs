@@ -24,14 +24,28 @@ public class CustomersViewModel : ViewModelBase
     public Customer? SelectedCustomer
     {
         get => _selectedCustomer;
-        set { if (SetField(ref _selectedCustomer, value)) LoadVehicles(); }
+        set
+        {
+            if (SetField(ref _selectedCustomer, value))
+            {
+                LoadVehicles();
+                AddVehicleCommand.RaiseCanExecuteChanged();
+            }
+        }
     }
 
     private Vehicle? _selectedVehicle;
     public Vehicle? SelectedVehicle
     {
         get => _selectedVehicle;
-        set { if (SetField(ref _selectedVehicle, value)) LoadHistory(); }
+        set
+        {
+            if (SetField(ref _selectedVehicle, value))
+            {
+                LoadHistory();
+                AddHistoryCommand.RaiseCanExecuteChanged();
+            }
+        }
     }
 
     // --- Pola formularza nowego klienta ---
