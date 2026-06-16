@@ -25,10 +25,9 @@ public class RepairOrdersViewModel : ViewModelBase
     private readonly WorkshopFacade _facade;
     private readonly PricingService _pricing = new();
     private readonly RepairNotifier _notifier;
-    private readonly EmailCustomerObserver _emailObserver;
-    private readonly ManagerAlertObserver _managerObserver;
     private readonly WorkshopMediator _mediator;
     private readonly Dictionary<int, RepairHistory> _histories = new();
+    private readonly HashSet<int> _completionRecorded = new();
     private readonly List<RelayCommand> _orderDependentCommands;
 
     // --- Kolekcje ---
@@ -139,10 +138,8 @@ public class RepairOrdersViewModel : ViewModelBase
         _db = db;
 
         _notifier = new RepairNotifier();
-        _emailObserver = new EmailCustomerObserver();
-        _managerObserver = new ManagerAlertObserver();
-        _notifier.Subscribe(_emailObserver);
-        _notifier.Subscribe(_managerObserver);
+        _notifier.Subscribe(new EmailCustomerObserver());
+        _notifier.Subscribe(new ManagerAlertObserver());
         _facade = new WorkshopFacade(_db, _notifier);
 
         _mediator = new WorkshopMediator(_db.Mechanics.ToList(), _db.Lifts.ToList(), _db.SpecialTools.ToList());
@@ -246,14 +243,6 @@ public class RepairOrdersViewModel : ViewModelBase
         Log($"Utworzono zlecenie #{order.Id}. Mediator: {alloc.Message}");
     }
 
-    /// <summary>Wymusza odświeżenie wiersza zaznaczonego zlecenia w DataGridzie (model nie wysyła PropertyChanged).</summary>
-    private void RefreshSelectedOrderRow()
-    {
-        if (SelectedOrder is null) return;
-        var idx = Orders.IndexOf(SelectedOrder);
-        if (idx >= 0) Orders[idx] = SelectedOrder;
-    }
-
     private void AddPart(object? _)
     {
         if (SelectedOrder is null || SelectedPart is null) return;
@@ -272,12 +261,12 @@ public class RepairOrdersViewModel : ViewModelBase
         var cmd = new AdvanceStageCommand(SelectedOrder, TargetStage, _db.Parts.Local.Any() ? _db.Parts.Local.ToList() : _db.Parts.ToList());
         history.Do(cmd);
 
-        if (statusBefore != RepairStatus.GotoweDoOdbioru && SelectedOrder.Status == RepairStatus.GotoweDoOdbioru)
+        if (statusBefore != RepairStatus.GotoweDoOdbioru && SelectedOrder.Status == RepairStatus.GotoweDoOdbioru
+            && _completionRecorded.Add(SelectedOrder.Id))
             _facade.RecordCompletion(SelectedOrder);
 
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
-        RefreshSelectedOrderRow();
         Log($"Wykonano komendę: {cmd.Description}. W historii: {history.Count} operacji.");
     }
 
@@ -288,7 +277,6 @@ public class RepairOrdersViewModel : ViewModelBase
         var msg = history.Undo();
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
-        RefreshSelectedOrderRow();
         Log(msg);
     }
 
