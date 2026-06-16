@@ -85,21 +85,16 @@
                 <GroupBox Header="Operacje na zleceniu (Facade / State / Command+Memento)">
                     <StackPanel>
                         <WrapPanel>
-                            <TextBlock Text="Zmień status (State):"/>
-                            <ComboBox ItemsSource="{Binding Statuses}" SelectedItem="{Binding TargetStatus}"/>
-                            <Button Content="Ustaw status" Command="{Binding ChangeStatusCommand}"/>
-                        </WrapPanel>
-                        <WrapPanel>
-                            <TextBlock Text="Dodaj część z magazynu:"/>
-                            <ComboBox ItemsSource="{Binding Parts}" SelectedItem="{Binding SelectedPart}" MinWidth="180"/>
-                            <TextBox Text="{Binding PartQuantity}" Width="50"/>
-                            <Button Content="Pobierz część" Command="{Binding AddPartCommand}"/>
-                        </WrapPanel>
-                        <WrapPanel>
                             <TextBlock Text="Etap naprawy (Command):"/>
                             <ComboBox ItemsSource="{Binding Stages}" SelectedItem="{Binding TargetStage}"/>
                             <Button Content="Wykonaj etap" Command="{Binding AdvanceStageCommand}"/>
                             <Button Content="↶ Cofnij (Undo/Memento)" Command="{Binding UndoCommand}"/>
+                        </WrapPanel>
+                        <WrapPanel>
+                            <TextBlock Text="Dodaj część z magazynu (etap kontroli):"/>
+                            <ComboBox ItemsSource="{Binding Parts}" SelectedItem="{Binding SelectedPart}" MinWidth="180"/>
+                            <TextBox Text="{Binding PartQuantity}" Width="50"/>
+                            <Button Content="Pobierz część" Command="{Binding AddPartCommand}"/>
                         </WrapPanel>
                     </StackPanel>
                 </GroupBox>
@@ -111,7 +106,7 @@
                             <TextBlock Text="Strategia robocizny:"/>
                             <ComboBox ItemsSource="{Binding LaborStrategies}" SelectedItem="{Binding SelectedStrategy}"
                                       DisplayMemberPath="Name" MinWidth="200"/>
-                            <TextBlock Text="Stawka/h (np. 150):"/>
+                            <TextBlock Text="{Binding LaborInputLabel}"/>
                             <TextBox Text="{Binding HourlyRate}" Width="60"/>
                         </WrapPanel>
                         <WrapPanel>
@@ -123,7 +118,7 @@
                             </ComboBox>
                             <TextBlock Text="Opis (np. Dopłata za ekspres):"/>
                             <TextBox Text="{Binding ModifierLabel}" MinWidth="140"/>
-                            <TextBlock Text="Wartość (np. 50):"/>
+                            <TextBlock Text="{Binding ModifierValueLabel}"/>
                             <TextBox Text="{Binding ModifierValue}" Width="60"/>
                             <Button Content="Dodaj warstwę" Command="{Binding AddModifierCommand}"/>
                             <Button Content="Przelicz cenę" Command="{Binding ComputePriceCommand}"/>

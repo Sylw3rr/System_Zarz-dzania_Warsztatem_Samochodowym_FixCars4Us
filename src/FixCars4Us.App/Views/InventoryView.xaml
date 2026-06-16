@@ -17,10 +17,10 @@
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Parts}" SelectedItem="{Binding SelectedPart}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Kod" Binding="{Binding Code}"/>
-                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Stan" Binding="{Binding StockQuantity}"/>
-                        <DataGridTextColumn Header="Min" Binding="{Binding MinStock}"/>
+                        <DataGridTextColumn Header="Kod" Binding="{Binding Code, Mode=OneWay}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Nazwa" Binding="{Binding Name, Mode=OneWay}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Stan" Binding="{Binding StockQuantity, Mode=OneWay}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Min" Binding="{Binding MinStock, Mode=OneWay}" IsReadOnly="True"/>
                         <DataGridCheckBoxColumn Header="Niski stan" Binding="{Binding IsLowStock, Mode=OneWay}"/>
                     </DataGrid.Columns>
                 </DataGrid>
