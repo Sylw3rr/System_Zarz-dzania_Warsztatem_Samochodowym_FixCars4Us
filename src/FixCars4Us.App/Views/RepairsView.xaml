@@ -81,6 +81,17 @@
                     </Grid>
                 </GroupBox>
 
+                <!-- LISTA PODNOŚNIKÓW — podgląd dostępnych zasobów (do wyboru Typu i udźwigu powyżej) -->
+                <GroupBox Header="Podnośniki w warsztacie">
+                    <DataGrid ItemsSource="{Binding Lifts}" IsReadOnly="True" AutoGenerateColumns="False" Height="120">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Typ" Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Udźwig (kg)" Binding="{Binding CapacityKg}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
                 <!-- FACADE + STATE + COMMAND/MEMENTO -->
                 <GroupBox Header="Operacje na zleceniu (Facade / State / Command+Memento)">
                     <StackPanel>
