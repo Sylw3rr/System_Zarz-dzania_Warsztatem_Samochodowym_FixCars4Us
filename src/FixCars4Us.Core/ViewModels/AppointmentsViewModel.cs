@@ -85,12 +85,13 @@ public class AppointmentsViewModel : ViewModelBase
         ReloadAppointments(); // Wczytaj listę zaplanowanych wizyt
     }
 
-    /// <summary>Odświeża listę wizyt (np. po dodaniu zlecenia naprawy w innej zakładce).</summary>
+    /// <summary>Odświeża wizyty oraz pojazdy/stanowiska (np. po dodaniu zlecenia lub pojazdu w innej zakładce).</summary>
     /// <remarks>
     /// Wywoływana przez MainWindow.MainTabs_SelectionChanged gdy użytkownik przełącza na tę zakładkę.
-    /// CreateOrder() w RepairOrdersViewModel może tworzyć wizyty automatycznie.
+    /// CreateOrder() w RepairOrdersViewModel może tworzyć wizyty automatycznie, a CustomersViewModel
+    /// może dodać nowy pojazd — Load() przeładowuje wszystko, nie tylko listę wizyt.
     /// </remarks>
-    public void Refresh() => ReloadAppointments();
+    public void Refresh() => Load();
 
     /// <summary>
     /// Przeładowuje listę wizyt z bazy — posortowane chronologicznie od najwcześniejszej.
