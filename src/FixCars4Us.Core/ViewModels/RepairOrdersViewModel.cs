@@ -201,8 +201,25 @@ public class RepairOrdersViewModel : ViewModelBase
         ReloadOrders(); // Załaduj zlecenia (osobna metoda bo wywoływana też przez Refresh)
     }
 
-    /// <summary>Odświeża listę zleceń bez resetowania pozostałych danych (np. po zmianie zakładki).</summary>
-    public void Refresh() => ReloadOrders();
+    /// <summary>
+    /// Odświeża wszystkie dane zakładki (np. po zmianie zakładki) — części, pojazdy, mechanicy,
+    /// podnośniki i stanowiska mogły zostać zmienione w innej zakładce (Katalog, Klienci),
+    /// więc trzeba je przeładować razem z listą zleceń.
+    /// </summary>
+    public void Refresh()
+    {
+        Vehicles.Clear();
+        foreach (var v in _db.Vehicles.Include(v => v.Customer)) Vehicles.Add(v);
+        Mechanics.Clear();
+        foreach (var m in _db.Mechanics) Mechanics.Add(m);
+        Lifts.Clear();
+        foreach (var l in _db.Lifts) Lifts.Add(l);
+        Parts.Clear();
+        foreach (var p in _db.Parts) Parts.Add(p); // Nowe części z Katalogu są tu dostępne do wyboru
+        Stations.Clear();
+        foreach (var s in _db.ReceptionStations) Stations.Add(s);
+        ReloadOrders();
+    }
 
     /// <summary>
     /// Przeładowuje listę zleceń, pomijając zakończone (terminal state).
@@ -312,6 +329,7 @@ public class RepairOrdersViewModel : ViewModelBase
 
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
+        _orderDependentCommands.RaiseAll(); // Status mógł się zmienić (np. na GotoweDoOdbioru) — odśwież CanExecute, w tym FinishOrderCommand
         Log($"Wykonano komendę: {cmd.Description}. W historii: {history.Count} operacji.");
     }
 
@@ -327,6 +345,7 @@ public class RepairOrdersViewModel : ViewModelBase
         var msg = history.Undo(); // Zdejmij ze stosu, cofnij skutki i pobierz komunikat
         _db.SaveChanges(); // Utrwal przywrócony stan (Stage, Status, stany magazynowe)
         OnPropertyChanged(nameof(SelectedOrderLog)); // Odśwież dziennik (Undo dodało wpis "COFNIĘTO")
+        _orderDependentCommands.RaiseAll(); // Status mógł wrócić do wcześniejszego — odśwież CanExecute (np. FinishOrderCommand)
         Log(msg); // Wyświetl np. "Cofnięto: Etap -> PraceWlasciwe"
     }
 

@@ -118,12 +118,15 @@ public class InventoryViewModel : ViewModelBase
         OnPropertyChanged(nameof(LowStockParts)); // Powiadom UI że lista alertów mogła się zmienić
     }
 
-    /// <summary>Odświeża alert niskich stanów (np. po zmianie zakładki gdy WorkshopFacade pobrał części).</summary>
+    /// <summary>
+    /// Odświeża listę części (np. po zmianie zakładki gdy w Katalogu dodano nową część,
+    /// albo WorkshopFacade zmienił stan magazynowy) i alert niskich stanów.
+    /// </summary>
     /// <remarks>
-    /// Part.StockQuantity zmieniony przez WorkshopFacade aktualizuje Part.IsLowStock (przez INotifyPropertyChanged
-    /// w Part), ale LowStockParts (właściwość obliczana w VM) wymaga osobnego odświeżenia.
+    /// Wcześniej Refresh() tylko wywoływał OnPropertyChanged(nameof(LowStockParts)) bez przeładowania
+    /// kolekcji Parts — nowe części dodane w CatalogViewModel nigdy nie trafiały do tej listy.
     /// </remarks>
-    public void Refresh() => OnPropertyChanged(nameof(LowStockParts));
+    public void Refresh() => Load();
 
     /// <summary>
     /// Wykonuje ruch magazynowy (Przychód lub Rozchód) dla wybranej części.
