@@ -1,59 +1,45 @@
-// Plik: RepairOrdersViewModel.cs
-// Rola: Centralny ViewModel modułu zleceń napraw — integruje wszystkie wzorce projektowe.
-//       Jest "dyrektorem orkiestry" który wie kiedy i jak użyć każdego wzorca.
-// Wzorce: Builder, Mediator, State, Command, Memento, Strategy, Decorator, Observer, Facade.
-//         To serce systemu — każda operacja na zleceniu przechodzi przez ten ViewModel.
-
-using System.Collections.ObjectModel; // ObservableCollection — lista powiadamiająca UI
-using FixCars4Us.Core.Data;           // WorkshopContext — baza danych
-using FixCars4Us.Core.Enums;          // RepairStatus, RepairStage, MechanicSpecialization, LiftType
-using FixCars4Us.Core.Infrastructure; // ViewModelBase, RelayCommand
-using FixCars4Us.Core.Models;         // RepairOrder, Vehicle, Part, Mechanic itd.
-using FixCars4Us.Core.Patterns;       // Builder, Mediator, State, Command, Observer, Strategy
-using FixCars4Us.Core.Services;       // WorkshopFacade, PricingService
-using Microsoft.EntityFrameworkCore;  // Include() — eager loading
+using System.Collections.ObjectModel;
+using FixCars4Us.Core.Data;
+using FixCars4Us.Core.Enums;
+using FixCars4Us.Core.Infrastructure;
+using FixCars4Us.Core.Models;
+using FixCars4Us.Core.Patterns;
+using FixCars4Us.Core.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace FixCars4Us.Core.ViewModels;
 
 /// <summary>
-/// Centralny moduł zleceń napraw — łączy WSZYSTKIE funkcje dodatkowe i większość wzorców:
-///  • Builder            – składanie zlecenia,
-///  • Mediator           – inteligentne przypisywanie zasobów (funkcja dodatkowa 1),
-///  • Strategy+Decorator – dynamiczna wycena naprawy (funkcja dodatkowa 2),
-///  • Command+Memento    – etapy naprawy z cofaniem (funkcja dodatkowa 3),
-///  • State              – cykl życia zlecenia,
-///  • Observer           – powiadomienia,
-///  • Facade             – Panel Mechanika (operacje na zleceniu).
+/// Centralny ViewModel modułu zleceń napraw.
+/// Wzorce: Builder, Mediator, State, Command, Memento, Strategy, Decorator, Observer, Facade.
 /// </summary>
 public class RepairOrdersViewModel : ViewModelBase
 {
-    private readonly WorkshopContext _db;             // Kontekst EF Core (Shared DbContext)
-    private readonly WorkshopFacade _facade;          // Fasada — ukrywa szczegóły operacji na zleceniach
-    private readonly PricingService _pricing = new(); // Serwis wyceny (Strategy + Decorator)
-    private readonly RepairNotifier _notifier;        // Subject Observer — rozsyła powiadomienia
-    private readonly WorkshopMediator _mediator;      // Mediator — przydziela zasoby warsztatowe
-    private readonly Dictionary<int, RepairHistory> _histories = new(); // Caretaker — historia komend per zlecenie
-    private readonly HashSet<int> _completionRecorded = new();          // Zapobiega duplikatom ServiceHistoryEntry po Undo+Redo
-    private readonly List<RelayCommand> _orderDependentCommands;        // Komendy zależne od SelectedOrder (dla RaiseAll)
+    private readonly WorkshopContext _db;
+    private readonly WorkshopFacade _facade;
+    private readonly PricingService _pricing = new();
+    private readonly RepairNotifier _notifier;
+    private readonly WorkshopMediator _mediator;
+    private readonly Dictionary<int, RepairHistory> _histories = new(); // historia komend per zlecenie (Memento)
+    private readonly HashSet<int> _completionRecorded = new(); // zapobiega duplikatom wpisu historii po Undo+Redo
+    private readonly List<RelayCommand> _orderDependentCommands;
 
-    // --- Kolekcje danych dla formularzy ---
-    public ObservableCollection<RepairOrder> Orders { get; } = new();          // Lista aktywnych zleceń (bez Zakonczone)
-    public ObservableCollection<Vehicle> Vehicles { get; } = new();            // Pojazdy do wyboru przy tworzeniu zlecenia
-    public ObservableCollection<Mechanic> Mechanics { get; } = new();          // Mechanicy (informacyjnie)
-    public ObservableCollection<Lift> Lifts { get; } = new();                  // Podnośniki (informacyjnie)
-    public ObservableCollection<Part> Parts { get; } = new();                  // Części do dodania do kosztorysu
-    public ObservableCollection<ReceptionStation> Stations { get; } = new();  // Stanowiska przyjęć (dla kalendarza)
-    public ObservableCollection<string> Notifications { get; } = new();       // Dziennik powiadomień Observer
-    public ObservableCollection<string> PriceBreakdown { get; } = new();      // Rozbicie wyceny (Decorator.Breakdown)
-    public ObservableCollection<PriceModifier> Modifiers { get; } = new();    // Modyfikatory do dodania do potoku Decorator
-    public ObservableCollection<ILaborCostStrategy> LaborStrategies { get; } = new(); // Dostępne strategie wyceny robocizny
+    public ObservableCollection<RepairOrder> Orders { get; } = new();
+    public ObservableCollection<Vehicle> Vehicles { get; } = new();
+    public ObservableCollection<Mechanic> Mechanics { get; } = new();
+    public ObservableCollection<Lift> Lifts { get; } = new();
+    public ObservableCollection<Part> Parts { get; } = new();
+    public ObservableCollection<ReceptionStation> Stations { get; } = new();
+    public ObservableCollection<string> Notifications { get; } = new();
+    public ObservableCollection<string> PriceBreakdown { get; } = new();
+    public ObservableCollection<PriceModifier> Modifiers { get; } = new();
+    public ObservableCollection<ILaborCostStrategy> LaborStrategies { get; } = new();
 
-    // Tablice enum do ComboBox — Enum.GetValues() zwraca wszystkie wartości enum jako Array.
-    public Array Specializations => Enum.GetValues(typeof(MechanicSpecialization)); // Dla ComboBox specjalizacji
-    public Array LiftTypes => Enum.GetValues(typeof(LiftType));                    // Dla ComboBox typu podnośnika
-    public Array Stages => Enum.GetValues(typeof(RepairStage));                    // Dla ComboBox docelowego etapu
+    public Array Specializations => Enum.GetValues(typeof(MechanicSpecialization));
+    public Array LiftTypes => Enum.GetValues(typeof(LiftType));
+    public Array Stages => Enum.GetValues(typeof(RepairStage));
 
-    // --- Formularz nowego zlecenia (Builder + Mediator) ---
+    // --- Formularz nowego zlecenia ---
     public Vehicle? NewVehicle { get; set; }
     public string NewFault { get; set; } = "";
     public MechanicSpecialization NewSpecialization { get; set; }
@@ -77,7 +63,6 @@ public class RepairOrdersViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Etykieta pola stawki — zależna od wybranej strategii robocizny (Strategy).</summary>
     public string LaborInputLabel => SelectedStrategy is FlatRateLaborStrategy
         ? "Kwota ryczałtu (zł, np. 500):"
         : "Stawka za godzinę (zł, np. 150):";
@@ -93,7 +78,6 @@ public class RepairOrdersViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Etykieta pola wartości modyfikatora — zł dla dopłaty kwotowej, % dla procentowych.</summary>
     public string ModifierValueLabel => ModifierKind == "surcharge"
         ? "Wartość (zł, np. 50):"
         : "Wartość (%, np. 10):";
@@ -140,72 +124,61 @@ public class RepairOrdersViewModel : ViewModelBase
     public RelayCommand AddModifierCommand { get; }
     public RelayCommand ComputePriceCommand { get; }
 
-    /// <summary>
-    /// Konstruktor — inicjalizuje wszystkie wzorce projektowe i wczytuje dane.
-    /// Tworzy: Observer, Facade, Mediator, strategie wyceny, komendy WPF.
-    /// </summary>
     public RepairOrdersViewModel(WorkshopContext db)
     {
-        _db = db; // Zapamiętaj współdzielony kontekst (ten sam co w innych ViewModelach)
+        _db = db;
 
-        // Observer: stwórz notifiera i zarejestruj obserwatorów (inline — bez pól klasy).
+        // OBSERVER: notifier + obserwatorzy
         _notifier = new RepairNotifier();
-        _notifier.Subscribe(new EmailCustomerObserver()); // Powiadomienia e-mail do klienta
-        _notifier.Subscribe(new ManagerAlertObserver());  // Alerty dla managera (niski stan, zakończenie)
+        _notifier.Subscribe(new EmailCustomerObserver());
+        _notifier.Subscribe(new ManagerAlertObserver());
 
-        // Facade: jeden punkt dostępu do operacji na zleceniach.
+        // FACADE
         _facade = new WorkshopFacade(_db, _notifier);
 
-        // Mediator: wczytaj katalogi zasobów (raz, przy starcie) — Mediator zarządza rezerwacjami w pamięci.
+        // MEDIATOR: katalog zasobów warsztatowych
         _mediator = new WorkshopMediator(_db.Mechanics.ToList(), _db.Lifts.ToList(), _db.SpecialTools.ToList());
 
-        // Strategy: dodaj wszystkie dostępne strategie wyceny robocizny do listy w UI.
-        LaborStrategies.Add(new TimeBasedLaborStrategy());       // Czas × stawka
-        LaborStrategies.Add(new ManufacturerNormLaborStrategy()); // Czas × 1.15 × stawka (normy prod.)
-        LaborStrategies.Add(new FlatRateLaborStrategy());         // Ryczałt (stawka = kwota całkowita)
-        SelectedStrategy = LaborStrategies[0]; // Domyślna strategia: czas rzeczywisty
+        // STRATEGY: dostępne strategie wyceny robocizny
+        LaborStrategies.Add(new TimeBasedLaborStrategy());
+        LaborStrategies.Add(new ManufacturerNormLaborStrategy());
+        LaborStrategies.Add(new FlatRateLaborStrategy());
+        SelectedStrategy = LaborStrategies[0];
 
-        // Command: stwórz komendy WPF powiązane z metodami prywatymi i warunkami CanExecute.
-        CreateOrderCommand = new RelayCommand(CreateOrder); // Bez warunku — zawsze aktywna
-        AddPartCommand = new RelayCommand(AddPart, _ => SelectedOrder != null && SelectedPart != null); // Oba muszą być wybrane
-        AdvanceStageCommand = new RelayCommand(AdvanceStage, _ => SelectedOrder != null); // Wymaga wybranego zlecenia
-        UndoCommand = new RelayCommand(Undo, _ => SelectedOrder != null);                 // Wymaga wybranego zlecenia
-        AddModifierCommand = new RelayCommand(AddModifier);  // Dodaj modyfikator do listy Decoratorów
-        ComputePriceCommand = new RelayCommand(ComputePrice, _ => SelectedOrder != null); // Wymaga zlecenia
-        FinishOrderCommand = new RelayCommand(FinishOrder,  // Aktywna tylko gdy State pozwala na Zakonczone
+        CreateOrderCommand = new RelayCommand(CreateOrder);
+        AddPartCommand = new RelayCommand(AddPart, _ => SelectedOrder != null && SelectedPart != null);
+        AdvanceStageCommand = new RelayCommand(AdvanceStage, _ => SelectedOrder != null);
+        UndoCommand = new RelayCommand(Undo, _ => SelectedOrder != null);
+        AddModifierCommand = new RelayCommand(AddModifier);
+        ComputePriceCommand = new RelayCommand(ComputePrice, _ => SelectedOrder != null);
+        FinishOrderCommand = new RelayCommand(FinishOrder,
             _ => SelectedOrder != null && RepairStateFactory.Create(SelectedOrder.Status).CanTransitionTo(RepairStatus.Zakonczone));
 
-        // Lista komend zależnych od SelectedOrder — przy zmianie zaznaczenia odświeżamy wszystkie.
         _orderDependentCommands = new List<RelayCommand>
         {
             AddPartCommand, AdvanceStageCommand, UndoCommand, ComputePriceCommand, FinishOrderCommand
         };
 
-        Load(); // Wczytaj dane z bazy
+        Load();
     }
 
     /// <summary>Wczytuje wszystkie dane potrzebne do formularzy i listy zleceń.</summary>
     public void Load()
     {
-        // Załaduj dane referencyjne do ComboBoxów w formularzach.
         Vehicles.Clear();
-        foreach (var v in _db.Vehicles.Include(v => v.Customer)) Vehicles.Add(v); // Include(Customer) dla wyświetlenia imienia
+        foreach (var v in _db.Vehicles.Include(v => v.Customer)) Vehicles.Add(v);
         Mechanics.Clear();
-        foreach (var m in _db.Mechanics) Mechanics.Add(m);           // Lista mechaników (informacyjnie)
+        foreach (var m in _db.Mechanics) Mechanics.Add(m);
         Lifts.Clear();
-        foreach (var l in _db.Lifts) Lifts.Add(l);                   // Lista podnośników (informacyjnie)
+        foreach (var l in _db.Lifts) Lifts.Add(l);
         Parts.Clear();
-        foreach (var p in _db.Parts) Parts.Add(p);                   // Części do wyboru w AddPartCommand
+        foreach (var p in _db.Parts) Parts.Add(p);
         Stations.Clear();
-        foreach (var s in _db.ReceptionStations) Stations.Add(s);    // Stanowiska (dla kalendarza)
-        ReloadOrders(); // Załaduj zlecenia (osobna metoda bo wywoływana też przez Refresh)
+        foreach (var s in _db.ReceptionStations) Stations.Add(s);
+        ReloadOrders();
     }
 
-    /// <summary>
-    /// Odświeża wszystkie dane zakładki (np. po zmianie zakładki) — części, pojazdy, mechanicy,
-    /// podnośniki i stanowiska mogły zostać zmienione w innej zakładce (Katalog, Klienci),
-    /// więc trzeba je przeładować razem z listą zleceń.
-    /// </summary>
+    // Przeładowuje wszystko, bo Katalog/Klienci mogli zmienić dane w innej zakładce.
     public void Refresh()
     {
         Vehicles.Clear();
@@ -215,103 +188,83 @@ public class RepairOrdersViewModel : ViewModelBase
         Lifts.Clear();
         foreach (var l in _db.Lifts) Lifts.Add(l);
         Parts.Clear();
-        foreach (var p in _db.Parts) Parts.Add(p); // Nowe części z Katalogu są tu dostępne do wyboru
+        foreach (var p in _db.Parts) Parts.Add(p);
         Stations.Clear();
         foreach (var s in _db.ReceptionStations) Stations.Add(s);
         ReloadOrders();
     }
 
-    /// <summary>
-    /// Przeładowuje listę zleceń, pomijając zakończone (terminal state).
-    /// Przywraca poprzednie zaznaczenie na podstawie Id — DataGrid nie traci zaznaczenia.
-    /// </summary>
+    /// <summary>Przeładowuje listę zleceń (bez zakończonych) i przywraca poprzednie zaznaczenie po Id.</summary>
     private void ReloadOrders()
     {
-        var selectedId = SelectedOrder?.Id; // Zapamiętaj Id zaznaczonego zlecenia przed czyszczeniem
-        Orders.Clear(); // Wyczyść kolekcję ObservableCollection (powiadomi DataGrid)
-        // Załaduj przez Facade (eager loading) i odfiltruj Zakonczone — nie pojawiają się w aktywnej liście.
+        var selectedId = SelectedOrder?.Id;
+        Orders.Clear();
         foreach (var o in _facade.LoadOrders().Where(o => o.Status != RepairStatus.Zakonczone)) Orders.Add(o);
-        // Przywróć zaznaczenie — FirstOrDefault zwraca null jeśli zlecenie nie jest już w liście.
         SelectedOrder = selectedId is null ? null : Orders.FirstOrDefault(o => o.Id == selectedId);
     }
 
-    /// <summary>
-    /// Wyświetla komunikat w polu Status i dodaje do listy powiadomień z timestamp.
-    /// Insert(0,...) = dodaj na POCZĄTKU (najnowsze na górze).
-    /// </summary>
     private void Log(string msg)
     {
-        Status = msg; // Pole statusu na dole okna (binding przez INotifyPropertyChanged)
-        Notifications.Insert(0, $"{DateTime.Now:HH:mm:ss}  {msg}"); // Dodaj z godziną na początku listy
+        Status = msg;
+        Notifications.Insert(0, $"{DateTime.Now:HH:mm:ss}  {msg}");
     }
 
     /// <summary>Tworzy zlecenie: Mediator przydziela zasoby, Builder składa obiekt, Facade zapisuje.</summary>
-    /// <remarks>
-    /// Sekwencja wzorców:
-    /// 1. Mediator.TryAllocate()    — znajdź wolnego mechanika, podnośnik i narzędzie
-    /// 2. RepairOrderBuilder.Build() — złóż zlecenie krok po kroku (Fluent API)
-    /// 3. Facade.PersistNewOrder()  — zapisz do bazy (EF Core nadaje Id)
-    /// 4. Opcjonalnie: Appointments.Add() — zarezerwuj stanowisko przyjęć na ten czas
-    /// </remarks>
     private void CreateOrder(object? _)
     {
-        // Guard: pojazd musi być wybrany (formularz jest niekompletny bez pojazdu).
         if (NewVehicle is null) { Log("Wybierz pojazd."); return; }
 
-        // Oblicz okno czasowe naprawy: data + godzina startu, plus szacowany czas.
         var start = NewDate.Date.AddHours(NewStartHour);
-        var end = start.AddHours((double)Math.Max(1, NewEstimatedHours)); // Min. 1 godzina
+        var end = start.AddHours((double)Math.Max(1, NewEstimatedHours));
 
-        // MEDIATOR: stwórz żądanie i poproś o przydział zasobów.
+        // MEDIATOR: przydziel zasoby (mechanik + podnośnik [+ narzędzie])
         var req = new ResourceRequest(NewSpecialization, NewLiftType, NewCapacityKg, NewRequiresTool, start, end);
-        var alloc = _mediator.TryAllocate(req); // Atomowe przydzielenie: mechanik + podnośnik [+ narzędzie]
-        if (!alloc.Success) { Log("Mediator: " + alloc.Message); return; } // Fail fast: brak zasobów
+        var alloc = _mediator.TryAllocate(req);
+        if (!alloc.Success) { Log("Mediator: " + alloc.Message); return; }
 
-        // BUILDER: złóż zlecenie krok po kroku (Fluent API).
+        // BUILDER: złóż zlecenie krok po kroku
         var builder = new RepairOrderBuilder()
-            .ForVehicle(NewVehicle)              // Przypisz pojazd (z FK)
-            .WithFault(NewFault)                 // Opis usterki z formularza
-            .AssignMechanic(alloc.Mechanic!)     // Mechanik przydzielony przez Mediator (! = nie null po Success)
-            .UseLift(alloc.Lift!)                // Podnośnik przydzielony przez Mediator
-            .EstimateHours(NewEstimatedHours)    // Szacowany czas (używany przez Strategy)
-            .AddLabor("Diagnostyka i naprawa", HourlyRate, NewEstimatedHours); // Pierwsza pozycja kosztorysu
-        if (alloc.Tool is not null) builder.UseTool(alloc.Tool); // Narzędzie tylko gdy wymagane i dostępne
+            .ForVehicle(NewVehicle)
+            .WithFault(NewFault)
+            .AssignMechanic(alloc.Mechanic!)
+            .UseLift(alloc.Lift!)
+            .EstimateHours(NewEstimatedHours)
+            .AddLabor("Diagnostyka i naprawa", HourlyRate, NewEstimatedHours);
+        if (alloc.Tool is not null) builder.UseTool(alloc.Tool);
 
-        var order = builder.Build(); // Finalizuj: Status=Przyjete, Stage=Diagnostyka, pierwszy log
+        var order = builder.Build();
 
-        // FACADE: zapisz zlecenie do bazy (EF Core nada Id).
+        // FACADE: zapis do bazy
         _facade.PersistNewOrder(order);
 
-        // Automatyczna rezerwacja stanowiska przyjęć gdy jest wolne w tym czasie.
+        // Spróbuj zarezerwować wolne stanowisko przyjęć na ten sam czas.
         var freeStation = _db.ReceptionStations.FirstOrDefault(s => !_db.Appointments.Any(a =>
-            a.ReceptionStationId == s.Id && start < a.End && a.Start < end)); // Klasyczny test nakładania
+            a.ReceptionStationId == s.Id && start < a.End && a.Start < end));
         if (freeStation is not null)
         {
-            _db.Appointments.Add(new Appointment // Dodaj wizytę powiązaną z nowym zleceniem
+            _db.Appointments.Add(new Appointment
             {
                 VehicleId = NewVehicle.Id,
                 ReceptionStationId = freeStation.Id,
                 Start = start,
                 End = end,
-                Reason = NewFault // Opis z formularza zlecenia
+                Reason = NewFault
             });
-            _db.SaveChanges(); // Utrwal wizytę w bazie
+            _db.SaveChanges();
         }
 
-        // Odśwież listę i zaznacz nowe zlecenie.
         ReloadOrders();
-        SelectedOrder = Orders.FirstOrDefault(o => o.Id == order.Id); // Zaznacz nowe zlecenie
-        Log($"Utworzono zlecenie #{order.Id}. Mediator: {alloc.Message}"); // Komunikat z wynikiem Mediatora
+        SelectedOrder = Orders.FirstOrDefault(o => o.Id == order.Id);
+        Log($"Utworzono zlecenie #{order.Id}. Mediator: {alloc.Message}");
     }
 
     /// <summary>Dodaje wybraną część do kosztorysu zlecenia przez Facade (rozchód z magazynu).</summary>
     private void AddPart(object? _)
     {
-        if (SelectedOrder is null || SelectedPart is null) return; // Guard — oba wymagane
-        var (_, msg) = _facade.AddPartToOrder(SelectedOrder, SelectedPart, PartQuantity); // Facade: walidacja + rozchód + kosztorys
-        // Part.StockQuantity : INotifyPropertyChanged — DataGrid Inventory odświeży się samo.
-        OnPropertyChanged(nameof(SelectedOrderLog)); // Odśwież log zlecenia (nowy wpis z rozchodem)
-        Log(msg); // Wyświetl wynik operacji w StatusBar
+        if (SelectedOrder is null || SelectedPart is null) return;
+        var (_, msg) = _facade.AddPartToOrder(SelectedOrder, SelectedPart, PartQuantity); // FACADE: walidacja + rozchód + kosztorys
+        OnPropertyChanged(nameof(SelectedOrderLog));
+        Log(msg);
     }
 
     /// <summary>Przejście do kolejnego etapu jako Command (z możliwością Undo dzięki Memento).</summary>
@@ -320,6 +273,7 @@ public class RepairOrdersViewModel : ViewModelBase
         if (SelectedOrder is null) return;
         var history = GetHistory(SelectedOrder.Id);
         var statusBefore = SelectedOrder.Status;
+        // COMMAND: AdvanceStageCommand
         var cmd = new AdvanceStageCommand(SelectedOrder, TargetStage, _db.Parts.Local.Any() ? _db.Parts.Local.ToList() : _db.Parts.ToList());
         history.Do(cmd);
 
@@ -329,46 +283,37 @@ public class RepairOrdersViewModel : ViewModelBase
 
         _db.SaveChanges();
         OnPropertyChanged(nameof(SelectedOrderLog));
-        _orderDependentCommands.RaiseAll(); // Status mógł się zmienić (np. na GotoweDoOdbioru) — odśwież CanExecute, w tym FinishOrderCommand
+        _orderDependentCommands.RaiseAll(); // status mógł się zmienić, np. odblokować FinishOrderCommand
         Log($"Wykonano komendę: {cmd.Description}. W historii: {history.Count} operacji.");
     }
 
-    /// <summary>
-    /// Cofa ostatnią operację etapową (wzorzec Command + Memento, LIFO).
-    /// RepairHistory.Undo() zdejmuje komendę ze stosu i wywołuje jej Undo(),
-    /// przywracając stan Stage, Status i stanów magazynowych z Memento.
-    /// </summary>
+    /// <summary>Cofa ostatnią operację etapową (Command + Memento, LIFO).</summary>
     private void Undo(object? _)
     {
-        if (SelectedOrder is null) return; // Guard
-        var history = GetHistory(SelectedOrder.Id); // Caretaker — historia komend tego zlecenia
-        var msg = history.Undo(); // Zdejmij ze stosu, cofnij skutki i pobierz komunikat
-        _db.SaveChanges(); // Utrwal przywrócony stan (Stage, Status, stany magazynowe)
-        OnPropertyChanged(nameof(SelectedOrderLog)); // Odśwież dziennik (Undo dodało wpis "COFNIĘTO")
-        _orderDependentCommands.RaiseAll(); // Status mógł wrócić do wcześniejszego — odśwież CanExecute (np. FinishOrderCommand)
-        Log(msg); // Wyświetl np. "Cofnięto: Etap -> PraceWlasciwe"
+        if (SelectedOrder is null) return;
+        var history = GetHistory(SelectedOrder.Id);
+        var msg = history.Undo(); // MEMENTO: przywróć poprzedni stan
+        _db.SaveChanges();
+        OnPropertyChanged(nameof(SelectedOrderLog));
+        _orderDependentCommands.RaiseAll();
+        Log(msg);
     }
 
-    /// <summary>
-    /// Pobiera (lub tworzy) RepairHistory (Caretaker Memento) dla podanego Id zlecenia.
-    /// Każde zlecenie ma swoją niezależną historię — Dictionary zapewnia izolację.
-    /// </summary>
     private RepairHistory GetHistory(int orderId)
     {
-        // TryGetValue: bezpieczne pobranie bez wyjątku gdy klucz nie istnieje.
         if (!_histories.TryGetValue(orderId, out var h))
         {
-            h = new RepairHistory(); // Nowe zlecenie = nowy stos komend
-            _histories[orderId] = h; // Zarejestruj w słowniku dla przyszłych wywołań
+            h = new RepairHistory();
+            _histories[orderId] = h;
         }
-        return h; // Zwróć istniejącą lub nowo stworzoną historię
+        return h;
     }
 
-    /// <summary>Kończy zlecenie (wydanie pojazdu klientowi) i usuwa je z listy aktywnych zleceń.</summary>
+    /// <summary>Kończy zlecenie (wydanie pojazdu) i usuwa je z listy aktywnych.</summary>
     private void FinishOrder(object? _)
     {
         if (SelectedOrder is null) return;
-        var (ok, msg) = _facade.ChangeStatus(SelectedOrder, RepairStatus.Zakonczone);
+        var (ok, msg) = _facade.ChangeStatus(SelectedOrder, RepairStatus.Zakonczone); // STATE: walidacja przejścia
         Log(msg);
         if (ok)
         {
@@ -377,15 +322,9 @@ public class RepairOrdersViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// Dodaje modyfikator ceny do listy Modifiers.
-    /// Lista jest używana przez ComputePrice do budowania potoku Decoratorów.
-    /// Guard: wymagana niepusta etykieta i niezerowa wartość.
-    /// </summary>
     private void AddModifier(object? _)
     {
-        if (string.IsNullOrWhiteSpace(ModifierLabel) || ModifierValue == 0) return; // Walidacja
-        // Dodaj do ObservableCollection — UI (ItemsControl) odświeży listę modyfikatorów.
+        if (string.IsNullOrWhiteSpace(ModifierLabel) || ModifierValue == 0) return;
         Modifiers.Add(new PriceModifier(ModifierKind, ModifierLabel, ModifierValue));
     }
 
@@ -395,6 +334,7 @@ public class RepairOrdersViewModel : ViewModelBase
         if (SelectedOrder is null || SelectedStrategy is null) return;
 
         var discount = SelectedOrder.Vehicle?.Customer?.DiscountPercent ?? 0;
+        // STRATEGY + DECORATOR: koszt robocizny i nakładki cenowe
         var price = _pricing.BuildPrice(SelectedOrder, SelectedStrategy, HourlyRate, discount, Modifiers);
 
         PriceBreakdown.Clear();
