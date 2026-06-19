@@ -118,8 +118,7 @@ Szczegółowy opis wraz z fragmentami kodu znajduje się w raporcie (`report/`).
 ├── docs/
 │   └── ARCHITEKTURA.md
 ├── report/
-│   ├── Raport_FixCars4Us.docx   – raport projektu (do uzupełnienia zrzutami ekranu)
-│   └── SCENARIUSZ_DEMO_YT.md     – scenariusz nagrania filmiku
+│   └── Raport_FixCars4Us.docx   – raport projektu
 └── src/
     ├── FixCars4Us.Core/
     └── FixCars4Us.App/
